@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import LoginPage from './pages/LoginPage/LoginPage'
+import LandingPage from './pages/LandingPage/LandingPage'
 import WorkersPage from './pages/WorkersPage/WorkersPage'
 import AttendanceMarkingPage from './pages/AttendanceMarkingPage/AttendanceMarkingPage'
 import DashboardPage from './pages/DashboardPage/DashboardPage'
@@ -39,7 +40,11 @@ function App() {
       <Routes>
         <Route
           path="/login"
-          element={supervisor ? <Navigate to="/workers" /> : <LoginPage onLogin={handleLogin} />}
+          element={supervisor ? <Navigate to="/analytics" /> : <LoginPage onLogin={handleLogin} />}
+        />
+        <Route
+          path="/analytics"
+          element={supervisor ? <LandingPage /> : <Navigate to="/login" />}
         />
         <Route
           path="/workers"
@@ -53,7 +58,7 @@ function App() {
           path="/dashboard"
           element={supervisor ? <DashboardPage /> : <Navigate to="/login" />}
         />
-        <Route path="/" element={<Navigate to={supervisor ? '/workers' : '/login'} />} />
+        <Route path="/" element={<Navigate to={supervisor ? '/analytics' : '/login'} />} />
       </Routes>
     </Router>
   )

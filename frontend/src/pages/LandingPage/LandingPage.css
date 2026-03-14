@@ -120,6 +120,7 @@
   box-shadow: var(--shadow-md);
   border: 1px solid var(--color-border-light);
   animation: slideInUp 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: visible;
 }
 
 .landing-chart-card h3 {
@@ -140,6 +141,7 @@
   background: var(--color-bg-light);
   border-radius: var(--radius-md);
   padding: 20px 0;
+  overflow: visible;
 }
 
 /* Detailed Table Section */

@@ -12,6 +12,7 @@ function Navbar({ supervisor, onLogout }) {
     <nav>
       <div style={{ display: 'flex', alignItems: 'center', flex: 1, gap: '24px' }}>
         <span className="brand">👷 BlueTrack</span>
+        <a onClick={() => navigate('/analytics')} style={{ cursor: 'pointer' }}>📈 Analytics</a>
         <a onClick={() => navigate('/workers')} style={{ cursor: 'pointer' }}>👥 Workers</a>
         <a onClick={() => navigate('/marking')} style={{ cursor: 'pointer' }}>📋 Mark Attendance</a>
         <a onClick={() => navigate('/dashboard')} style={{ cursor: 'pointer' }}>📊 Dashboard</a>

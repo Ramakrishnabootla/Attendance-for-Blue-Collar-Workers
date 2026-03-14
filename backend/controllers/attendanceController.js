@@ -73,11 +73,17 @@ const markAttendance = async (req, res) => {
 
     // Check if record exists
     const [existing] = await connection.execute(
-      'SELECT id FROM attendance WHERE worker_id = ? AND date = ?',
+      'SELECT id, check_in, check_out FROM attendance WHERE worker_id = ? AND date = ?',
       [worker_id, today]
     );
 
     if (existing.length > 0) {
+      // Check if attendance is already completed (both check_in and check_out present)
+      if (existing[0].check_in && existing[0].check_out) {
+        connection.release();
+        return res.status(400).json({ error: 'Attendance already completed for today. No changes allowed.' });
+      }
+
       // Update existing
       await connection.execute(
         'UPDATE attendance SET status = ?, check_in = ?, check_out = ?, absence_reason = ? WHERE worker_id = ? AND date = ?',
@@ -116,15 +122,22 @@ const bulkMarkAttendance = async (req, res) => {
     const connection = await pool.getConnection();
 
     // Process each record
+    const completedRecords = [];
     for (const record of records) {
       const { worker_id, status, check_in, check_out, absence_reason } = record;
 
       const [existing] = await connection.execute(
-        'SELECT id FROM attendance WHERE worker_id = ? AND date = ?',
+        'SELECT id, check_in, check_out FROM attendance WHERE worker_id = ? AND date = ?',
         [worker_id, today]
       );
 
       if (existing.length > 0) {
+        // Check if attendance is already completed
+        if (existing[0].check_in && existing[0].check_out) {
+          completedRecords.push(worker_id);
+          continue; // Skip updating this record
+        }
+
         await connection.execute(
           'UPDATE attendance SET status = ?, check_in = ?, check_out = ?, absence_reason = ? WHERE worker_id = ? AND date = ?',
           [status, check_in || null, check_out || null, absence_reason || null, worker_id, today]
@@ -139,9 +152,14 @@ const bulkMarkAttendance = async (req, res) => {
 
     connection.release();
 
+    let message = `${records.length - completedRecords.length} attendance records saved`;
+    if (completedRecords.length > 0) {
+      message += `. ${completedRecords.length} record(s) already completed and not updated: ${completedRecords.join(', ')}`;
+    }
+
     res.json({
       success: true,
-      message: `${records.length} attendance records saved`
+      message
     });
   } catch (err) {
     console.error('Bulk attendance error:', err);

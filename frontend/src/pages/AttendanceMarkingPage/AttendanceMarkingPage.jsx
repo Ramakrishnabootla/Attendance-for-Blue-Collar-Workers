@@ -240,22 +240,30 @@ function AttendanceMarkingPage() {
                         <td>
                           <div className="action-buttons">
                             {isPresent && !hasCheckOut ? (
-                              // Present without checkout - show Check Out button only
-                              <button
-                                className="btn btn-primary action-btn-present"
-                                onClick={() => togglePresent(worker.worker_id)}
-                                disabled={submitting}
-                              >
-                                Check Out
-                              </button>
+                              // Present without checkout - show both Check Out and Mark Absent
+                              <>
+                                <button
+                                  className="btn btn-primary action-btn-present"
+                                  onClick={() => togglePresent(worker.worker_id)}
+                                  disabled={submitting}
+                                >
+                                  Check Out
+                                </button>
+                                <button
+                                  className="btn btn-danger action-btn-absent"
+                                  onClick={() => markAbsent(worker.worker_id)}
+                                  disabled={submitting}
+                                >
+                                  Mark Absent
+                                </button>
+                              </>
                             ) : isPresent && hasCheckOut ? (
-                              // Present with checkout complete - show Mark Absent button to toggle
+                              // Present with checkout complete - attendance completed, no changes allowed
                               <button
-                                className="btn btn-danger action-btn-absent"
-                                onClick={() => markAbsent(worker.worker_id)}
-                                disabled={submitting}
+                                className="btn btn-success action-btn-completed"
+                                disabled={true}
                               >
-                                Mark Absent
+                                ✓ Completed
                               </button>
                             ) : (
                               // Absent - show Mark Present button to toggle

@@ -12,7 +12,7 @@ export const loginSupervisor = async (phone, password) => {
 
 // Worker API calls
 export const fetchWorkers = async () => {
-  const response = await fetch(`${API_URL}/workers`);
+  const response = await fetch(`${API_URL}/workers?include_inactive=true`);
   return response.json();
 };
 

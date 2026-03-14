@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { fetchTodayAttendance, getAttendanceByDateRange } from '../../utils/api'
-import { getTodayIndia, formatDateReadable } from '../../utils/timezoneHelper'
+import { getTodayIndia, formatDateReadable, formatSecondsToHHMMSS } from '../../utils/timezoneHelper'
 import SearchBar from '../../components/SearchBar'
 import DateRangeSelector from '../../components/DateRangeSelector'
 import './DashboardPage.css'
@@ -9,6 +9,7 @@ function DashboardPage() {
   const [data, setData] = useState(null)
   const [filteredData, setFilteredData] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [dateLoading, setDateLoading] = useState(false)
   const [error, setError] = useState('')
   const [showDateSelector, setShowDateSelector] = useState(false)
   const [selectedDate, setSelectedDate] = useState(getTodayIndia())
@@ -44,7 +45,7 @@ function DashboardPage() {
 
   const handleDateSelect = async (date) => {
     try {
-      setLoading(true)
+      setDateLoading(true)
       setSelectedDate(date)
       setShowDateSelector(false)
 
@@ -68,7 +69,7 @@ function DashboardPage() {
     } catch (err) {
       setError('Failed to load attendance for selected date')
     } finally {
-      setLoading(false)
+      setDateLoading(false)
     }
   }
 
@@ -205,7 +206,18 @@ function DashboardPage() {
         {attendance.length === 0 ? (
           <p className="no-records">No attendance records {isFilteredDate ? 'for this date' : 'for today'}.</p>
         ) : (
-          <div className="dashboard-table-wrapper">
+          <div className="dashboard-table-wrapper" style={{ position: 'relative', opacity: dateLoading ? 0.6 : 1, transition: 'opacity 0.3s ease' }}>
+            {dateLoading && (
+              <div style={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                zIndex: 10
+              }}>
+                <div className="spinner" style={{ width: '40px', height: '40px' }}></div>
+              </div>
+            )}
             <table className="dashboard-table">
               <thead>
                 <tr>
@@ -214,6 +226,7 @@ function DashboardPage() {
                   <th>Job Type</th>
                   <th>Check-In</th>
                   <th>Check-Out</th>
+                  <th>Time Spent</th>
                   <th>Status</th>
                 </tr>
               </thead>
@@ -242,6 +255,9 @@ function DashboardPage() {
                             hour12: true
                           })
                         : '-'}
+                    </td>
+                    <td>
+                      {record.time_spent_seconds ? formatSecondsToHHMMSS(record.time_spent_seconds) : '-'}
                     </td>
                     <td>
                       <span
