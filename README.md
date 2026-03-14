@@ -368,27 +368,6 @@ Tested on:
 └──────────────────────────────────┘
 ```
 
----
-
-## 🚫 NOT Included (By Design)
-
-These features are **deliberately excluded** to maintain speed and simplicity:
-
-- ❌ QR code scanning
-- ❌ GPS location tracking
-- ❌ Photo/biometric verification
-- ❌ Wage calculation engine
-- ❌ Email notifications
-- ❌ Complex role-based access (only supervisors)
-- ❌ Redux or complex state management
-- ❌ TypeScript (plain JavaScript only)
-- ❌ Extra npm packages (minimal deps)
-- ❌ JWT tokens (localStorage only)
-- ❌ Multi-day date picker (today only)
-- ❌ Offline mode
-- ❌ React hooks beyond useState/useEffect
-
-**Why?** These would double the codebase and reduce speed. MVP solves the core problem: **fast, fraud-proof daily attendance tracking**.
 
 ---
 
@@ -533,8 +512,6 @@ frontend/src/
 Open source for educational & hackathon use.
 
 ---
-
-## 👨‍💻 Built with ❤️ for Blue Collar Workers
 
 **BlueTrack** is designed to empower supervisors, eliminate fraud, and give daily-wage workers the respect of a digital record.
 
