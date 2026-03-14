@@ -460,19 +460,27 @@ backend/
 └── .env                         # Database credentials
 
 
-frontend/
-├── src/
-│   ├── App.jsx       (Router + auth state)
-│   ├── index.css     (Global styles)
-│   ├── main.jsx      (React entry point)
-│   └── components/
-│       ├── Login.jsx
-│       ├── WorkerList.jsx
-│       ├── AttendanceMarking.jsx
-│       ├── Dashboard.jsx
-│       └── Navbar.jsx
-├── index.html
-├── vite.config.js
+frontend/src/
+├── pages/                       # Page Components (Each has JSX + CSS)
+│   ├── LoginPage/
+│   │   ├── LoginPage.jsx       # Component logic
+│   │   └── LoginPage.css       # Page-specific styles
+│   ├── WorkersPage/
+│   │   ├── WorkersPage.jsx
+│   │   └── WorkersPage.css
+│   ├── AttendanceMarkingPage/
+│   │   ├── AttendanceMarkingPage.jsx
+│   │   └── AttendanceMarkingPage.css
+│   └── DashboardPage/
+│       ├── DashboardPage.jsx
+│       └── DashboardPage.css
+├── components/
+│   └── Navbar.jsx              # Top navigation bar (reusable)
+├── utils/
+│   └── api.js                  # Centralized API calls
+├── App.jsx                      # Main routing component
+├── main.jsx                     # React entry point
+├── index.css                    # Global styles
 └── package.json
 ```
 

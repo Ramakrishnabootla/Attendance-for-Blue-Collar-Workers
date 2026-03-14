@@ -89,29 +89,12 @@
 
 .workers-table tbody tr {
   transition: var(--transition-fast);
-  position: relative;
-}
-
-.workers-table tbody tr::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  height: 100%;
-  width: 3px;
-  background: linear-gradient(180deg, var(--primary-blue) 0%, var(--primary-blue-dark) 100%);
-  transform: scaleY(0);
-  transform-origin: top;
-  transition: transform 0.3s ease;
-}
-
-.workers-table tbody tr:hover::before {
-  transform: scaleY(1);
+  border-left: 3px solid transparent;
 }
 
 .workers-table tbody tr:hover {
   background-color: var(--bg-lighter);
-  transform: translateX(4px);
+  border-left-color: var(--primary-blue);
   box-shadow: inset 0 0 10px rgba(37, 99, 235, 0.05);
 }
 

@@ -100,29 +100,12 @@
 
 .dashboard-table tbody tr {
   transition: var(--transition-fast);
-  position: relative;
-}
-
-.dashboard-table tbody tr::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  height: 100%;
-  width: 3px;
-  background: linear-gradient(180deg, var(--primary-blue) 0%, var(--success-green) 100%);
-  transform: scaleY(0);
-  transform-origin: top;
-  transition: transform 0.3s ease;
-}
-
-.dashboard-table tbody tr:hover::before {
-  transform: scaleY(1);
+  border-left: 3px solid transparent;
 }
 
 .dashboard-table tbody tr:hover {
   background-color: var(--bg-lighter);
-  transform: translateX(4px);
+  border-left-color: var(--primary-blue);
   box-shadow: inset 0 0 10px rgba(37, 99, 235, 0.05);
 }
 
@@ -273,5 +256,87 @@
   .dashboard-refresh-btn {
     padding: 12px 20px;
     font-size: 14px;
+  }
+}
+
+/* Dashboard Controls */
+.dashboard-controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+  animation: slideInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dashboard-control-item {
+  flex: 1;
+  min-width: 280px;
+}
+
+.dashboard-controls .btn {
+  white-space: nowrap;
+  min-height: 44px;
+  padding: 12px 18px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* Date Selector Wrapper */
+.dashboard-date-selector-wrapper {
+  position: relative;
+  margin-bottom: 20px;
+  padding: 20px;
+  background: var(--color-bg-light);
+  border-radius: var(--radius-lg);
+  animation: slideInDown 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.no-records {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--color-text-muted);
+  font-size: 15px;
+  background: var(--color-bg-light);
+  border-radius: var(--radius-md);
+  margin-top: 20px;
+}
+
+/* Responsive Dashboard Controls */
+@media (max-width: 1024px) {
+  .dashboard-controls {
+    gap: 10px;
+  }
+
+  .dashboard-control-item {
+    min-width: 240px;
+  }
+
+  .dashboard-controls .btn {
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-controls {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .dashboard-control-item {
+    width: 100%;
+    min-width: auto;
+  }
+
+  .dashboard-controls .btn {
+    width: 100%;
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+
+  .dashboard-date-selector-wrapper {
+    padding: 16px;
+    margin-bottom: 16px;
   }
 }

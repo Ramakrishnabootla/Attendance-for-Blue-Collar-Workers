@@ -1,0 +1,156 @@
+.date-range-selector {
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: 350px;
+  overflow: hidden;
+}
+
+.date-range-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  color: white;
+}
+
+.date-range-header h4 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.date-range-close {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  font-size: 20px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition);
+}
+
+.date-range-close:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.date-range-content {
+  padding: 20px;
+}
+
+.date-range-quick-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.date-range-quick-btn {
+  padding: 10px 12px;
+  border: 2px solid var(--color-border);
+  background: white;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+  color: var(--color-text);
+}
+
+.date-range-quick-btn:hover {
+  border-color: var(--color-primary);
+  background: var(--color-bg-light);
+  color: var(--color-primary);
+}
+
+.date-range-divider {
+  height: 1px;
+  background: var(--color-border);
+  margin: 16px 0;
+}
+
+.date-range-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.date-range-input-group label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.date-range-input {
+  padding: 12px;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  transition: all var(--transition);
+}
+
+.date-range-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+}
+
+.date-range-info {
+  margin: 12px 0 0 0;
+  font-size: 12px;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+
+.date-range-info strong {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.date-range-footer {
+  display: flex;
+  gap: 12px;
+  padding: 20px;
+  background: var(--color-bg-light);
+  border-top: 1px solid var(--color-border);
+}
+
+.date-range-footer .btn-secondary,
+.date-range-footer .btn-primary {
+  flex: 1;
+  padding: 12px 16px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.date-range-footer .btn-secondary {
+  background: white;
+  color: var(--color-text);
+  border: 2px solid var(--color-border);
+}
+
+.date-range-footer .btn-secondary:hover {
+  border-color: var(--color-text-muted);
+}
+
+.date-range-footer .btn-primary {
+  background: var(--color-primary);
+  color: white;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.date-range-footer .btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
+}

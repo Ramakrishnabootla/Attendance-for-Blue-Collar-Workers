@@ -1,0 +1,121 @@
+.search-bar-container {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+}
+
+.search-bar-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-bar-input {
+  width: 100%;
+  padding: 12px 40px 12px 16px;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 15px;
+  transition: all var(--transition);
+  background: var(--color-bg-light);
+}
+
+.search-bar-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  background: white;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+}
+
+.search-bar-input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.search-bar-clear {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: 8px;
+  transition: color var(--transition);
+}
+
+.search-bar-clear:hover {
+  color: var(--color-text);
+}
+
+.search-bar-spinner {
+  position: absolute;
+  right: 12px;
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: smoothSpin 1s linear infinite;
+}
+
+.search-bar-results {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 4px;
+  background: white;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md);
+  max-height: 300px;
+  overflow-y: auto;
+  z-index: 10;
+  animation: slideInUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.search-bar-result-item {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--color-border-light);
+  cursor: pointer;
+  transition: all var(--transition);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.search-bar-result-item:last-child {
+  border-bottom: none;
+}
+
+.search-bar-result-item:hover {
+  background: var(--color-bg-light);
+}
+
+.search-bar-job-type {
+  font-size: 12px;
+  background: var(--color-primary-light);
+  color: var(--color-primary-dark);
+  padding: 2px 8px;
+  border-radius: 12px;
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+.search-bar-no-results {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 4px;
+  padding: 16px;
+  background: white;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md);
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  z-index: 10;
+}

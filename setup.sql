@@ -52,6 +52,19 @@ INSERT INTO workers (worker_id, name, phone, job_type) VALUES
 ('W007', 'Rohit Singh', '9876543216', 'Factory'),
 ('W008', 'Divya Nair', '9876543217', 'Delivery');
 
+-- Schema enhancements for v2 features
+-- Add worker status and deactivation tracking
+ALTER TABLE workers ADD COLUMN is_active BOOLEAN DEFAULT TRUE;
+ALTER TABLE workers ADD COLUMN deactivation_reason VARCHAR(255) DEFAULT NULL;
+ALTER TABLE workers ADD COLUMN worker_id_sequence INT DEFAULT NULL;
+
+-- Populate worker_id_sequence with existing id values
+UPDATE workers SET worker_id_sequence = id WHERE id > 0 AND worker_id_sequence IS NULL;
+
+-- Add attendance tracking enhancements
+ALTER TABLE attendance ADD COLUMN absence_reason VARCHAR(255) DEFAULT NULL;
+ALTER TABLE attendance ADD COLUMN time_spent_seconds INT DEFAULT NULL;
+
 -- Verify setup
 SELECT '✓ Supervisors' as table_name, COUNT(*) as count FROM supervisors;
 SELECT '✓ Workers' as table_name, COUNT(*) as count FROM workers;

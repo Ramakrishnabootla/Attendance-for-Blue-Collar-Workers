@@ -61,29 +61,12 @@
 
 .attendance-table tbody tr {
   transition: var(--transition-fast);
-  position: relative;
-}
-
-.attendance-table tbody tr::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  height: 100%;
-  width: 3px;
-  background: linear-gradient(180deg, var(--primary-blue) 0%, var(--success-green) 100%);
-  transform: scaleY(0);
-  transform-origin: top;
-  transition: transform 0.3s ease;
-}
-
-.attendance-table tbody tr:hover::before {
-  transform: scaleY(1);
+  border-left: 3px solid transparent;
 }
 
 .attendance-table tbody tr:hover {
   background-color: var(--bg-lighter);
-  transform: translateX(4px);
+  border-left-color: var(--primary-blue);
 }
 
 .attendance-table tbody tr:nth-child(even) {

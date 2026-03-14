@@ -1,15 +1,27 @@
 import { useState, useEffect } from 'react'
-import { fetchTodayAttendance } from '../../utils/api'
+import { fetchTodayAttendance, getAttendanceByDateRange } from '../../utils/api'
+import { getTodayIndia, formatDateReadable } from '../../utils/timezoneHelper'
+import SearchBar from '../../components/SearchBar'
+import DateRangeSelector from '../../components/DateRangeSelector'
 import './DashboardPage.css'
 
 function DashboardPage() {
   const [data, setData] = useState(null)
+  const [filteredData, setFilteredData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [showDateSelector, setShowDateSelector] = useState(false)
+  const [selectedDate, setSelectedDate] = useState(getTodayIndia())
+  const [searchQuery, setSearchQuery] = useState('')
 
   const getTodayFormatted = () => {
     const options = { year: 'numeric', month: 'long', day: 'numeric' }
-    return new Date().toLocaleDateString('en-US', options)
+    return new Date().toLocaleDateString('en-IN', {
+      timeZone: 'Asia/Kolkata',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    })
   }
 
   useEffect(() => {
@@ -21,10 +33,66 @@ function DashboardPage() {
       setLoading(true)
       const dashboardData = await fetchTodayAttendance()
       setData(dashboardData)
+      setFilteredData(dashboardData)
+      setSelectedDate(getTodayIndia())
     } catch (err) {
       setError('Failed to load dashboard data')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleDateSelect = async (date) => {
+    try {
+      setLoading(true)
+      setSelectedDate(date)
+      setShowDateSelector(false)
+
+      // Fetch attendance for selected date and workers created on that date
+      const response = await getAttendanceByDateRange(date, date)
+
+      if (response.success) {
+        setFilteredData({
+          ...response,
+          attendance: response.attendance || [],
+          summary: {
+            total_workers: response.workers.length,
+            present_today: (response.attendance || []).filter(r => r.status === 'Present').length,
+            absent_today: (response.attendance || []).filter(r => r.status === 'Absent').length
+          }
+        })
+        setError('')
+      } else {
+        setError('Failed to load date data')
+      }
+    } catch (err) {
+      setError('Failed to load attendance for selected date')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSearchResults = (results) => {
+    if (results && results.length > 0) {
+      // Filter attendance records to only show matched workers
+      const matchedWorkerIds = results.map(w => w.worker_id)
+      const filtered = (data?.attendance || []).filter(
+        att => matchedWorkerIds.includes(att.worker_id)
+      )
+
+      setFilteredData({
+        ...data,
+        attendance: filtered,
+        summary: {
+          total_workers: results.length,
+          present_today: filtered.filter(r => r.status === 'Present').length,
+          absent_today: filtered.filter(r => r.status === 'Absent').length
+        }
+      })
+      setSearchQuery(results.map(w => w.worker_id).join(', '))
+    } else {
+      setFilteredData(data)
+      setSearchQuery('')
     }
   }
 
@@ -36,7 +104,7 @@ function DashboardPage() {
     )
   }
 
-  if (error) {
+  if (error && !data) {
     return (
       <div className="dashboard-container page">
         <div className="container">
@@ -46,8 +114,8 @@ function DashboardPage() {
     )
   }
 
-  const summary = data?.summary || { total_workers: 0, present_today: 0, absent_today: 0 }
-  const attendance = data?.attendance || []
+  const summary = filteredData?.summary || { total_workers: 0, present_today: 0, absent_today: 0 }
+  const attendance = filteredData?.attendance || []
 
   // Calculate percentages
   const presentPercentage =
@@ -55,44 +123,87 @@ function DashboardPage() {
       ? Math.round((summary.present_today / summary.total_workers) * 100)
       : 0
 
+  const isFilteredDate = selectedDate !== getTodayIndia()
+
   return (
     <div className="dashboard-container page">
       <div className="container">
-        <h1 className="dashboard-header">📊 Attendance Dashboard - {getTodayFormatted()}</h1>
+        <h1 className="dashboard-header">
+          📊 Attendance Dashboard - {isFilteredDate ? formatDateReadable(selectedDate) : getTodayFormatted()}
+        </h1>
+
+        {error && <div className="alert alert-error">{error}</div>}
+
+        {/* Control Bar */}
+        <div className="dashboard-controls">
+          <div className="dashboard-control-item">
+            <SearchBar onSearch={handleSearchResults} placeholder="Search workers..." />
+          </div>
+
+          <button
+            className={`btn ${isFilteredDate ? 'btn-primary' : 'btn-outline'}`}
+            onClick={() => setShowDateSelector(!showDateSelector)}
+          >
+            📅 {isFilteredDate ? 'Change Date' : 'Select Date'}
+          </button>
+
+          {isFilteredDate && (
+            <button
+              className="btn btn-secondary"
+              onClick={() => {
+                setSelectedDate(getTodayIndia())
+                loadDashboard()
+              }}
+            >
+              ← Today
+            </button>
+          )}
+
+          <button
+            className="btn btn-secondary"
+            onClick={loadDashboard}
+          >
+            🔄 Refresh
+          </button>
+        </div>
+
+        {/* Date Selector Modal */}
+        {showDateSelector && (
+          <div className="dashboard-date-selector-wrapper">
+            <DateRangeSelector
+              onDateSelect={handleDateSelect}
+              onCancel={() => setShowDateSelector(false)}
+            />
+          </div>
+        )}
 
         {/* Summary Cards */}
         <div className="dashboard-summary-row">
           <div className="dashboard-card">
             <h3>{summary.total_workers}</h3>
-            <p>Total Workers</p>
+            <p>Total{isFilteredDate ? ' (Created)' : ' Workers'}</p>
           </div>
           <div className="dashboard-card present">
             <h3>{summary.present_today}</h3>
-            <p>Present Today</p>
+            <p>Present</p>
           </div>
           <div className="dashboard-card absent">
             <h3>{summary.absent_today}</h3>
-            <p>Absent Today</p>
+            <p>Absent</p>
           </div>
           <div className="dashboard-card percentage">
             <h3>{presentPercentage}%</h3>
             <p>Attendance Rate</p>
           </div>
-          <div className="dashboard-card">
-          <button
-          className="btn btn-secondary dashboard-refresh-btn"
-          onClick={loadDashboard}
-        >
-          🔄 Refresh
-        </button>
-        </div>
         </div>
 
         {/* Attendance Table */}
-        <h2 className="dashboard-attendance-header">Today's Attendance Details</h2>
+        <h2 className="dashboard-attendance-header">
+          {isFilteredDate ? `Workers Created on ${formatDateReadable(selectedDate)}` : "Today's Attendance Details"}
+        </h2>
 
         {attendance.length === 0 ? (
-          <p>No attendance records for today.</p>
+          <p className="no-records">No attendance records {isFilteredDate ? 'for this date' : 'for today'}.</p>
         ) : (
           <div className="dashboard-table-wrapper">
             <table className="dashboard-table">
@@ -114,17 +225,21 @@ function DashboardPage() {
                     <td>{record.job_type}</td>
                     <td>
                       {record.check_in
-                        ? new Date(record.check_in).toLocaleTimeString('en-US', {
+                        ? new Date(record.check_in).toLocaleTimeString('en-IN', {
+                            timeZone: 'Asia/Kolkata',
                             hour: '2-digit',
-                            minute: '2-digit'
+                            minute: '2-digit',
+                            hour12: true
                           })
                         : '-'}
                     </td>
                     <td>
                       {record.check_out
-                        ? new Date(record.check_out).toLocaleTimeString('en-US', {
+                        ? new Date(record.check_out).toLocaleTimeString('en-IN', {
+                            timeZone: 'Asia/Kolkata',
                             hour: '2-digit',
-                            minute: '2-digit'
+                            minute: '2-digit',
+                            hour12: true
                           })
                         : '-'}
                     </td>
@@ -143,8 +258,6 @@ function DashboardPage() {
             </table>
           </div>
         )}
-
-        
       </div>
     </div>
   )
