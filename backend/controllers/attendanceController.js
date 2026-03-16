@@ -68,6 +68,36 @@ const markAttendance = async (req, res) => {
       return res.status(400).json({ error: 'worker_id and status required' });
     }
 
+    // Validate and parse datetime strings
+    let parsedCheckIn = null;
+    let parsedCheckOut = null;
+
+    if (check_in) {
+      try {
+        // Validate datetime format (YYYY-MM-DD HH:MM:SS)
+        if (!/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(check_in)) {
+          throw new Error('Invalid check_in format');
+        }
+        parsedCheckIn = check_in;
+      } catch (e) {
+        console.error(`Invalid check_in: ${check_in}`, e.message);
+        parsedCheckIn = null;
+      }
+    }
+
+    if (check_out) {
+      try {
+        // Validate datetime format (YYYY-MM-DD HH:MM:SS)
+        if (!/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(check_out)) {
+          throw new Error('Invalid check_out format');
+        }
+        parsedCheckOut = check_out;
+      } catch (e) {
+        console.error(`Invalid check_out: ${check_out}`, e.message);
+        parsedCheckOut = null;
+      }
+    }
+
     const today = getTodayIndia();
     const connection = await pool.getConnection();
 
@@ -87,13 +117,13 @@ const markAttendance = async (req, res) => {
       // Update existing
       await connection.execute(
         'UPDATE attendance SET status = ?, check_in = ?, check_out = ?, absence_reason = ? WHERE worker_id = ? AND date = ?',
-        [status, check_in || null, check_out || null, absence_reason || null, worker_id, today]
+        [status, parsedCheckIn, parsedCheckOut, absence_reason || null, worker_id, today]
       );
     } else {
       // Insert new
       await connection.execute(
         'INSERT INTO attendance (worker_id, date, status, check_in, check_out, absence_reason) VALUES (?, ?, ?, ?, ?, ?)',
-        [worker_id, today, status, check_in || null, check_out || null, absence_reason || null]
+        [worker_id, today, status, parsedCheckIn, parsedCheckOut, absence_reason || null]
       );
     }
 
@@ -105,7 +135,7 @@ const markAttendance = async (req, res) => {
     });
   } catch (err) {
     console.error('Mark attendance error:', err);
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ error: 'Server error', details: err.message });
   }
 };
 
@@ -126,6 +156,36 @@ const bulkMarkAttendance = async (req, res) => {
     for (const record of records) {
       const { worker_id, status, check_in, check_out, absence_reason } = record;
 
+      // Validate and parse datetime strings
+      let parsedCheckIn = null;
+      let parsedCheckOut = null;
+
+      if (check_in) {
+        try {
+          // Validate datetime format (YYYY-MM-DD HH:MM:SS)
+          if (!/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(check_in)) {
+            throw new Error('Invalid check_in format');
+          }
+          parsedCheckIn = check_in;
+        } catch (e) {
+          console.error(`Invalid check_in for ${worker_id}: ${check_in}`, e.message);
+          parsedCheckIn = null;
+        }
+      }
+
+      if (check_out) {
+        try {
+          // Validate datetime format (YYYY-MM-DD HH:MM:SS)
+          if (!/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(check_out)) {
+            throw new Error('Invalid check_out format');
+          }
+          parsedCheckOut = check_out;
+        } catch (e) {
+          console.error(`Invalid check_out for ${worker_id}: ${check_out}`, e.message);
+          parsedCheckOut = null;
+        }
+      }
+
       const [existing] = await connection.execute(
         'SELECT id, check_in, check_out FROM attendance WHERE worker_id = ? AND date = ?',
         [worker_id, today]
@@ -140,12 +200,12 @@ const bulkMarkAttendance = async (req, res) => {
 
         await connection.execute(
           'UPDATE attendance SET status = ?, check_in = ?, check_out = ?, absence_reason = ? WHERE worker_id = ? AND date = ?',
-          [status, check_in || null, check_out || null, absence_reason || null, worker_id, today]
+          [status, parsedCheckIn, parsedCheckOut, absence_reason || null, worker_id, today]
         );
       } else {
         await connection.execute(
           'INSERT INTO attendance (worker_id, date, status, check_in, check_out, absence_reason) VALUES (?, ?, ?, ?, ?, ?)',
-          [worker_id, today, status, check_in || null, check_out || null, absence_reason || null]
+          [worker_id, today, status, parsedCheckIn, parsedCheckOut, absence_reason || null]
         );
       }
     }
@@ -163,7 +223,7 @@ const bulkMarkAttendance = async (req, res) => {
     });
   } catch (err) {
     console.error('Bulk attendance error:', err);
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ error: 'Server error', details: err.message });
   }
 };
 
