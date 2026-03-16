@@ -60,12 +60,13 @@ npm run dev
 
 🚀 BlueTrack Backend running on http://localhost:5000
 📝 Endpoints ready:
-   POST   /api/login
-   GET    /api/workers
-   POST   /api/workers
-   GET    /api/attendance/today
-   POST   /api/attendance/mark
-   POST   /api/attendance/bulk
+
+API Tests (open these URLs in browser or Postman):
+  1. http://localhost:5000/api/workers → Lists active workers only
+  2. http://localhost:5000/api/workers/next-id → Should return {"next_id":"W009"}
+  3. http://localhost:5000/api/attendance/today → Includes time_spent_seconds
+  4. http://localhost:5000/api/attendance/statistics?days=7 → Returns daily data
+
 ```
 
 > **Demo Login:** Phone: `9999999999` | Password: `admin123`
@@ -89,11 +90,6 @@ npm run dev
 
 Visit: **http://localhost:5050**
 
----
-
-**Need help with database setup?** See [SETUP_DATABASE.md](./SETUP_DATABASE.md)
-
----
 
 ## 📋 Features (MVP)
 
@@ -232,140 +228,23 @@ curl http://localhost:5000/api/attendance/today
 }
 ```
 
----
-
-## 🎨 Design System
-
-### Colors
-- **Primary Dark:** #0A2647 (navbar, backgrounds)
-- **Primary Blue:** #1E3A5F (table headers)
-- **Success Green:** #00C853 (Present, buttons)
-- **Danger Red:** #D32F2F (Absent, alerts)
-- **Warning Yellow:** #FFC107 (stats)
-- **Light Gray:** #F5F5F5 (page backgrounds)
-
-### Typography
-- **Font:** Arial / Sans-serif
-- **Headings:** Bold, 32px (H1), 24px (H2), 18px (H3)
-- **Body:** 16px
-- **Code:** Monospace
-
-### Spacing
-- Base unit: 8px
-- Single spacing (--spacing-md): 16px
-- Double spacing (--spacing-lg): 24px
-- Large spacing (--spacing-xl): 32px
-
-### Accessibility
-- All buttons ≥48px × 48px tap area
-- High contrast ratios (WCAG AA)
-- Mobile-first responsive design
-- Focus states on all interactive elements
-
----
-
-## 📱 Mobile Responsive
-
-| Screen Size | Behavior |
-|-------------|----------|
-| **Mobile (320px-480px)** | Single-column layout, full-width buttons, large fonts |
-| **Tablet (481px-768px)** | Two-column grid, compact spacing |
-| **Desktop (769px+)** | Full layout, optimized for mouse |
-
-Tested on:
-- ✓ iPhone 12 (375px)
-- ✓ Samsung S21 (360px)
-- ✓ iPad (768px)
-- ✓ Desktop (1920px)
-
----
-
 ## 📊 Screenshots
 
 ### 1. Login Screen
 ```
-┌─────────────────────────────────┐
-│     BlueTrack 👷                │
-│   Supervisor Login              │
-│                                 │
-│  Phone Number: [9999999999   ]  │
-│  Password:     [admin123     ]  │
-│                                 │
-│  [        Login        ]        │
-│                                 │
-│  💡 Demo credentials pre-filled │
-└─────────────────────────────────┘
 ```
 
 ### 2. Worker List
 ```
-┌──────────────────────────────────┐
-│  👷 Workers                      │
-│  [  + Add Worker  ]              │
-│                                  │
-│ ┌──────────────────────────────┐ │
-│ │ ID    │ Name      │ Job Type │ │
-│ ├──────────────────────────────┤ │
-│ │ W001 │ Rajesh    │ Construct.│ │
-│ │ W002 │ Priya     │ Factory  │ │
-│ │ W003 │ Amit      │ Delivery │ │
-│ ├──────────────────────────────┤ │
-│ │ Add Worker Form (if shown)   │ │
-│ └──────────────────────────────┘ │
-└──────────────────────────────────┘
 ```
 
 ### 3. Mark Attendance (Quick Mode)
 ```
-┌──────────────────────────────────┐
-│ 📋 Mark Today's Attendance       │
-│    14 March 2026                 │
-│                                  │
-│ ┌──────────────────────────────┐ │
-│ │ Total: 8 │ Present: 6        │ │
-│ │ Absent: 2                    │ │
-│ └──────────────────────────────┘ │
-│                                  │
-│ ┌──────────────────────────────┐ │
-│ │ W001 | Rajesh   |✓PR | AB   │ │
-│ │ W002 | Priya    |✓PR | AB   │ │
-│ │ W003 | Amit     |✓PR | AB   │ │
-│ │ W004 | Neha     |✓PR | AB   │ │
-│ │ W005 | Vikram   |✓PR | AB   │ │
-│ │ W006 | Pooja    | PR |✓AB   │ │
-│ │ W007 | Rohit    | PR |✓AB   │ │
-│ │ W008 | Divya    | PR | AB   │ │
-│ └──────────────────────────────┘ │
-│                                  │
-│  [  ✓ Submit All  ]             │
-└──────────────────────────────────┘
 
-(PresENT button green, Absent button red,
- tappable on row or buttons)
 ```
 
 ### 4. Dashboard
 ```
-┌──────────────────────────────────┐
-│ 📊 Attendance Dashboard          │
-│    14 March 2026                 │
-│                                  │
-│ ┌──────┐ ┌──────┐ ┌──────┐      │
-│ │  8   │ │  6   │ │  2   │ 75% │
-│ │Total│ │Presen│ │Absen│      │
-│ └──────┘ └──────┘ └──────┘      │
-│                                  │
-│ ┌──────────────────────────────┐ │
-│ │ID│Name │Type│Check-In│Check │ │
-│ ├──────────────────────────────┤ │
-│ │W1│Raj  │Con │09:30  │17:45 │ │
-│ │W2│Priya│Fac │09:15  │17:30 │ │
-│ │W3│Amit │Del │ -     │ -    │ │
-│ │W4│Neha │Con │08:45  │18:00 │ │
-│ ├──────────────────────────────┤ │
-│ │ [  🔄 Refresh  ]             │ │
-│ └──────────────────────────────┘ │
-└──────────────────────────────────┘
 ```
 
 
@@ -516,9 +395,3 @@ Open source for educational & hackathon use.
 **BlueTrack** is designed to empower supervisors, eliminate fraud, and give daily-wage workers the respect of a digital record.
 
 ---
-
-**Questions? Check API endpoints in backend/index.js**
-**Database setup? See SETUP_DATABASE.md**
-**Need styles? See frontend/src/index.css**
-
-🚀 **Ready to deploy!**
