@@ -102,8 +102,9 @@ const getNextWorkerId = async (req, res) => {
   try {
     const connection = await pool.getConnection();
 
+    // Get MAX from ALL workers (including inactive) to avoid ID conflicts
     const [result] = await connection.execute(
-      'SELECT COALESCE(MAX(worker_id_sequence), 0) + 1 as next_seq FROM workers WHERE is_active = TRUE'
+      'SELECT COALESCE(MAX(worker_id_sequence), 0) + 1 as next_seq FROM workers'
     );
     connection.release();
 
