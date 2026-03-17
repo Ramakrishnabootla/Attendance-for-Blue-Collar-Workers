@@ -114,11 +114,22 @@ const markAttendance = async (req, res) => {
         return res.status(400).json({ error: 'Attendance already completed for today. No changes allowed.' });
       }
 
-      // Update existing
-      await connection.execute(
-        'UPDATE attendance SET status = ?, check_in = ?, check_out = ?, absence_reason = ? WHERE worker_id = ? AND date = ?',
-        [status, parsedCheckIn, parsedCheckOut, absence_reason || null, worker_id, today]
-      );
+      // Calculate time_spent_seconds if both check_in and check_out are present
+      let timeSpentSeconds = null;
+      if (parsedCheckIn && parsedCheckOut) {
+        await connection.execute(
+          `UPDATE attendance SET status = ?, check_in = ?, check_out = ?, absence_reason = ?, 
+           time_spent_seconds = TIMESTAMPDIFF(SECOND, ?, ?) 
+           WHERE worker_id = ? AND date = ?`,
+          [status, parsedCheckIn, parsedCheckOut, absence_reason || null, parsedCheckIn, parsedCheckOut, worker_id, today]
+        );
+      } else {
+        // Update without time_spent_seconds if checkout is not complete
+        await connection.execute(
+          'UPDATE attendance SET status = ?, check_in = ?, check_out = ?, absence_reason = ? WHERE worker_id = ? AND date = ?',
+          [status, parsedCheckIn, parsedCheckOut, absence_reason || null, worker_id, today]
+        );
+      }
     } else {
       // Insert new
       await connection.execute(
@@ -198,10 +209,20 @@ const bulkMarkAttendance = async (req, res) => {
           continue; // Skip updating this record
         }
 
-        await connection.execute(
-          'UPDATE attendance SET status = ?, check_in = ?, check_out = ?, absence_reason = ? WHERE worker_id = ? AND date = ?',
-          [status, parsedCheckIn, parsedCheckOut, absence_reason || null, worker_id, today]
-        );
+        // Calculate time_spent_seconds if both check_in and check_out are present
+        if (parsedCheckIn && parsedCheckOut) {
+          await connection.execute(
+            `UPDATE attendance SET status = ?, check_in = ?, check_out = ?, absence_reason = ?, 
+             time_spent_seconds = TIMESTAMPDIFF(SECOND, ?, ?) 
+             WHERE worker_id = ? AND date = ?`,
+            [status, parsedCheckIn, parsedCheckOut, absence_reason || null, parsedCheckIn, parsedCheckOut, worker_id, today]
+          );
+        } else {
+          await connection.execute(
+            'UPDATE attendance SET status = ?, check_in = ?, check_out = ?, absence_reason = ? WHERE worker_id = ? AND date = ?',
+            [status, parsedCheckIn, parsedCheckOut, absence_reason || null, worker_id, today]
+          );
+        }
       } else {
         await connection.execute(
           'INSERT INTO attendance (worker_id, date, status, check_in, check_out, absence_reason) VALUES (?, ?, ?, ?, ?, ?)',
