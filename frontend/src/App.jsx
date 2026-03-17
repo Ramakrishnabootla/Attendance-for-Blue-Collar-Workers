@@ -6,6 +6,7 @@ import WorkersPage from './pages/WorkersPage/WorkersPage'
 import AttendanceMarkingPage from './pages/AttendanceMarkingPage/AttendanceMarkingPage'
 import DashboardPage from './pages/DashboardPage/DashboardPage'
 import Navbar from './components/Navbar'
+import Footer from './components/Footer'
 
 function App() {
   const [supervisor, setSupervisor] = useState(null)
@@ -36,30 +37,35 @@ function App() {
 
   return (
     <Router>
-      {supervisor && <Navbar supervisor={supervisor} onLogout={handleLogout} />}
-      <Routes>
-        <Route
-          path="/login"
-          element={supervisor ? <Navigate to="/analytics" /> : <LoginPage onLogin={handleLogin} />}
-        />
-        <Route
-          path="/analytics"
-          element={supervisor ? <LandingPage /> : <Navigate to="/login" />}
-        />
-        <Route
-          path="/workers"
-          element={supervisor ? <WorkersPage /> : <Navigate to="/login" />}
-        />
-        <Route
-          path="/marking"
-          element={supervisor ? <AttendanceMarkingPage /> : <Navigate to="/login" />}
-        />
-        <Route
-          path="/dashboard"
-          element={supervisor ? <DashboardPage /> : <Navigate to="/login" />}
-        />
-        <Route path="/" element={<Navigate to={supervisor ? '/analytics' : '/login'} />} />
-      </Routes>
+      <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+        {supervisor && <Navbar supervisor={supervisor} onLogout={handleLogout} />}
+        <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+          <Routes>
+            <Route
+              path="/login"
+              element={supervisor ? <Navigate to="/analytics" /> : <LoginPage onLogin={handleLogin} />}
+            />
+            <Route
+              path="/analytics"
+              element={supervisor ? <LandingPage /> : <Navigate to="/login" />}
+            />
+            <Route
+              path="/workers"
+              element={supervisor ? <WorkersPage /> : <Navigate to="/login" />}
+            />
+            <Route
+              path="/marking"
+              element={supervisor ? <AttendanceMarkingPage /> : <Navigate to="/login" />}
+            />
+            <Route
+              path="/dashboard"
+              element={supervisor ? <DashboardPage /> : <Navigate to="/login" />}
+            />
+            <Route path="/" element={<Navigate to={supervisor ? '/analytics' : '/login'} />} />
+          </Routes>
+        </main>
+        {supervisor && <Footer />}
+      </div>
     </Router>
   )
 }

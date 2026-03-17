@@ -160,3 +160,55 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 480px) {
+  .confirm-reason-modal {
+    width: 95%;
+    max-width: calc(100% - 20px);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .confirm-reason-header {
+    padding: 16px;
+  }
+
+  .confirm-reason-header h3 {
+    font-size: 18px;
+  }
+
+  .confirm-reason-content {
+    padding: 16px;
+  }
+
+  .confirm-reason-buttons {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .confirm-reason-button {
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+
+  .confirm-reason-textarea {
+    font-size: 14px;
+    min-height: 80px;
+  }
+
+  .confirm-reason-footer {
+    flex-direction: column;
+    gap: 8px;
+    padding: 16px;
+  }
+
+  .confirm-reason-footer .btn-secondary,
+  .confirm-reason-footer .btn-primary {
+    min-width: auto;
+    width: 100%;
+  }
+}

@@ -4,6 +4,18 @@
   max-width: 400px;
 }
 
+@media (max-width: 768px) {
+  .search-bar-container {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .search-bar-container {
+    max-width: 100%;
+  }
+}
+
 .search-bar-input-wrapper {
   position: relative;
   display: flex;

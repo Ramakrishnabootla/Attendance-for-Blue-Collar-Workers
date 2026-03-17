@@ -46,9 +46,59 @@
 .login-card {
   max-width: 420px;
   width: 100%;
+  padding: var(--spacing-lg);
   position: relative;
   z-index: 10;
   animation: slideUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (max-width: 768px) {
+  .login-card {
+    max-width: 100%;
+    padding: var(--spacing-lg);
+  }
+
+  .login-card h1 {
+    font-size: 36px;
+  }
+
+  .login-card > p {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .login-container::before,
+  .login-container::after {
+    width: 300px;
+    height: 300px;
+  }
+
+  .login-card {
+    max-width: calc(100% - var(--spacing-md));
+    margin: auto;
+    padding: var(--spacing-lg);
+  }
+
+  .login-card h1 {
+    font-size: 28px;
+    margin-bottom: 8px;
+  }
+
+  .login-card > p {
+    font-size: 13px;
+    margin-bottom: 24px;
+  }
+
+  .login-form input {
+    font-size: 16px;
+    padding: 12px 16px;
+    border-radius: 8px;
+  }
+
+  .login-form .form-group {
+    margin-bottom: 16px;
+  }
 }
 
 @keyframes slideUp {
