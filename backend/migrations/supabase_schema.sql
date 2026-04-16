@@ -1,0 +1,61 @@
+-- BlueTrack PostgreSQL Schema (for Supabase)
+-- Run this in Supabase SQL Editor
+
+-- Create supervisors table
+CREATE TABLE IF NOT EXISTS supervisors (
+  id SERIAL PRIMARY KEY,
+  phone VARCHAR(20) NOT NULL UNIQUE,
+  password VARCHAR(255) NOT NULL,
+  name VARCHAR(100),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create workers table
+CREATE TABLE IF NOT EXISTS workers (
+  id SERIAL PRIMARY KEY,
+  worker_id VARCHAR(50) NOT NULL UNIQUE,
+  name VARCHAR(100) NOT NULL,
+  phone VARCHAR(20),
+  job_type VARCHAR(50),
+  is_active BOOLEAN DEFAULT TRUE,
+  deactivation_reason VARCHAR(255),
+  worker_id_sequence INT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create attendance table
+CREATE TABLE IF NOT EXISTS attendance (
+  id SERIAL PRIMARY KEY,
+  worker_id VARCHAR(50) NOT NULL,
+  date DATE NOT NULL,
+  check_in TIME,
+  check_out TIME,
+  status VARCHAR(50),
+  absence_reason VARCHAR(255),
+  time_spent_seconds INT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (worker_id) REFERENCES workers(worker_id),
+  UNIQUE (worker_id, date)
+);
+
+-- Insert demo supervisor
+INSERT INTO supervisors (phone, password, name)
+VALUES ('9999999999', 'admin123', 'Demo Supervisor')
+ON CONFLICT (phone) DO UPDATE SET name = 'Demo Supervisor';
+
+-- Insert demo workers
+INSERT INTO workers (worker_id, name, phone, job_type, is_active) VALUES
+('W001', 'Raj Kumar', '9876543210', 'Construction', TRUE),
+('W002', 'Priya Singh', '9876543211', 'Factory', TRUE),
+('W003', 'Vikram Patel', '9876543212', 'Delivery', TRUE),
+('W004', 'Anita Sharma', '9876543213', 'Construction', TRUE),
+('W005', 'Rohan Gupta', '9876543214', 'Contract Labour', TRUE),
+('W006', 'Neha Verma', '9876543215', 'Daily Wage', TRUE),
+('W007', 'Amit Kumar', '9876543216', 'Factory', TRUE),
+('W008', 'Pooja Desai', '9876543217', 'Delivery', TRUE)
+ON CONFLICT (worker_id) DO UPDATE SET name = EXCLUDED.name;
+
+-- Create indexes for performance
+CREATE INDEX IF NOT EXISTS idx_workers_job_type ON workers(job_type);
+CREATE INDEX IF NOT EXISTS idx_attendance_worker_date ON attendance(worker_id, date);
+CREATE INDEX IF NOT EXISTS idx_attendance_date ON attendance(date);

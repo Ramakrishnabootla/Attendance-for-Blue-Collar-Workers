@@ -1,23 +1,25 @@
-const { pool } = require('../config/db');
+const { supabase } = require('../config/db');
 
 // GET /api/workers - List all active workers
 const getWorkers = async (req, res) => {
   try {
     const includeInactive = req.query.include_inactive === 'true';
-    const connection = await pool.getConnection();
 
-    let query = 'SELECT id, worker_id, name, phone, job_type, is_active FROM workers';
+    let query = supabase
+      .from('workers')
+      .select('id, worker_id, name, phone, job_type, is_active');
+
     if (!includeInactive) {
-      query += ' WHERE is_active = TRUE';
+      query = query.eq('is_active', true);
     }
-    query += ' ORDER BY worker_id';
 
-    const [workers] = await connection.execute(query);
-    connection.release();
+    const { data: workers, error } = await query.order('worker_id', { ascending: true });
+
+    if (error) throw error;
 
     res.json({
       success: true,
-      workers: workers
+      workers: workers || []
     });
   } catch (err) {
     console.error('Get workers error:', err);
@@ -34,29 +36,44 @@ const createWorker = async (req, res) => {
       return res.status(400).json({ error: 'worker_id, name, and job_type required' });
     }
 
-    const connection = await pool.getConnection();
-
     // Get next worker_id_sequence
-    const [maxSeq] = await connection.execute(
-      'SELECT COALESCE(MAX(worker_id_sequence), 0) + 1 as next_seq FROM workers'
-    );
-    const nextSeq = maxSeq[0].next_seq;
+    const { data: maxSeqResult, error: maxError } = await supabase
+      .from('workers')
+      .select('worker_id_sequence')
+      .order('worker_id_sequence', { ascending: false })
+      .limit(1);
 
-    const [result] = await connection.execute(
-      'INSERT INTO workers (worker_id, name, phone, job_type, worker_id_sequence, is_active) VALUES (?, ?, ?, ?, ?, TRUE)',
-      [worker_id, name, phone || null, job_type, nextSeq]
-    );
-    connection.release();
+    if (maxError) throw maxError;
+
+    const nextSeq = (maxSeqResult && maxSeqResult.length > 0 && maxSeqResult[0].worker_id_sequence)
+      ? maxSeqResult[0].worker_id_sequence + 1
+      : 1;
+
+    const { data, error } = await supabase
+      .from('workers')
+      .insert([{
+        worker_id,
+        name,
+        phone: phone || null,
+        job_type,
+        worker_id_sequence: nextSeq,
+        is_active: true
+      }])
+      .select();
+
+    if (error) {
+      if (error.message.includes('duplicate')) {
+        return res.status(400).json({ error: 'Worker ID already exists' });
+      }
+      throw error;
+    }
 
     res.json({
       success: true,
       message: 'Worker created',
-      worker_id: result.insertId
+      worker_id: data[0].id
     });
   } catch (err) {
-    if (err.code === 'ER_DUP_ENTRY') {
-      return res.status(400).json({ error: 'Worker ID already exists' });
-    }
     console.error('Create worker error:', err);
     res.status(500).json({ error: 'Server error' });
   }
@@ -71,25 +88,18 @@ const searchWorkers = async (req, res) => {
       return res.status(400).json({ error: 'Search query required' });
     }
 
-    const connection = await pool.getConnection();
-    const searchTerm = `%${q}%`;
+    const { data: workers, error } = await supabase
+      .from('workers')
+      .select('id, worker_id, name, phone, job_type, is_active')
+      .eq('is_active', true)
+      .or(`name.ilike.%${q}%,worker_id.ilike.%${q}%,phone.ilike.%${q}%`)
+      .order('worker_id', { ascending: true });
 
-    const [workers] = await connection.execute(
-      `SELECT id, worker_id, name, phone, job_type, is_active
-       FROM workers
-       WHERE is_active = TRUE AND (
-         name LIKE ? OR
-         worker_id LIKE ? OR
-         phone LIKE ?
-       )
-       ORDER BY worker_id`,
-      [searchTerm, searchTerm, searchTerm]
-    );
-    connection.release();
+    if (error) throw error;
 
     res.json({
       success: true,
-      workers: workers
+      workers: workers || []
     });
   } catch (err) {
     console.error('Search workers error:', err);
@@ -100,15 +110,17 @@ const searchWorkers = async (req, res) => {
 // GET /api/workers/next-id - Get next worker ID
 const getNextWorkerId = async (req, res) => {
   try {
-    const connection = await pool.getConnection();
+    const { data: result, error } = await supabase
+      .from('workers')
+      .select('worker_id_sequence')
+      .order('worker_id_sequence', { ascending: false })
+      .limit(1);
 
-    // Get MAX from ALL workers (including inactive) to avoid ID conflicts
-    const [result] = await connection.execute(
-      'SELECT COALESCE(MAX(worker_id_sequence), 0) + 1 as next_seq FROM workers'
-    );
-    connection.release();
+    if (error) throw error;
 
-    const nextNum = result[0].next_seq;
+    const nextNum = (result && result.length > 0 && result[0].worker_id_sequence)
+      ? result[0].worker_id_sequence + 1
+      : 1;
     const nextId = `W${String(nextNum).padStart(3, '0')}`;
 
     res.json({
@@ -132,37 +144,24 @@ const updateWorker = async (req, res) => {
       return res.status(400).json({ error: 'Worker ID required' });
     }
 
-    const connection = await pool.getConnection();
+    const updateData = {};
+    if (name !== undefined) updateData.name = name;
+    if (phone !== undefined) updateData.phone = phone;
+    if (job_type !== undefined) updateData.job_type = job_type;
 
-    // Build dynamic query based on provided fields
-    const updates = [];
-    const values = [];
-
-    if (name !== undefined) {
-      updates.push('name = ?');
-      values.push(name);
-    }
-    if (phone !== undefined) {
-      updates.push('phone = ?');
-      values.push(phone);
-    }
-    if (job_type !== undefined) {
-      updates.push('job_type = ?');
-      values.push(job_type);
-    }
-
-    if (updates.length === 0) {
-      connection.release();
+    if (Object.keys(updateData).length === 0) {
       return res.status(400).json({ error: 'No fields to update' });
     }
 
-    values.push(id);
-    const query = `UPDATE workers SET ${updates.join(', ')} WHERE id = ?`;
+    const { data, error } = await supabase
+      .from('workers')
+      .update(updateData)
+      .eq('id', id)
+      .select();
 
-    const [result] = await connection.execute(query, values);
-    connection.release();
+    if (error) throw error;
 
-    if (result.affectedRows === 0) {
+    if (!data || data.length === 0) {
       return res.status(404).json({ error: 'Worker not found' });
     }
 
@@ -186,15 +185,18 @@ const deactivateWorker = async (req, res) => {
       return res.status(400).json({ error: 'Worker ID required' });
     }
 
-    const connection = await pool.getConnection();
+    const { data, error } = await supabase
+      .from('workers')
+      .update({
+        is_active: false,
+        deactivation_reason: reason || null
+      })
+      .eq('id', id)
+      .select();
 
-    const [result] = await connection.execute(
-      'UPDATE workers SET is_active = FALSE, deactivation_reason = ? WHERE id = ?',
-      [reason || null, id]
-    );
-    connection.release();
+    if (error) throw error;
 
-    if (result.affectedRows === 0) {
+    if (!data || data.length === 0) {
       return res.status(404).json({ error: 'Worker not found' });
     }
 
@@ -217,15 +219,18 @@ const activateWorker = async (req, res) => {
       return res.status(400).json({ error: 'Worker ID required' });
     }
 
-    const connection = await pool.getConnection();
+    const { data, error } = await supabase
+      .from('workers')
+      .update({
+        is_active: true,
+        deactivation_reason: null
+      })
+      .eq('id', id)
+      .select();
 
-    const [result] = await connection.execute(
-      'UPDATE workers SET is_active = TRUE, deactivation_reason = NULL WHERE id = ?',
-      [id]
-    );
-    connection.release();
+    if (error) throw error;
 
-    if (result.affectedRows === 0) {
+    if (!data || data.length === 0) {
       return res.status(404).json({ error: 'Worker not found' });
     }
 

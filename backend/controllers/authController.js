@@ -1,4 +1,4 @@
-const { pool } = require('../config/db');
+const { supabase } = require('../config/db');
 
 // POST /api/login - Supervisor login
 const login = async (req, res) => {
@@ -9,24 +9,23 @@ const login = async (req, res) => {
       return res.status(400).json({ error: 'Phone and password required' });
     }
 
-    const connection = await pool.getConnection();
-    const [supervisors] = await connection.execute(
-      'SELECT * FROM supervisors WHERE phone = ? AND password = ?',
-      [phone, password]
-    );
-    connection.release();
+    const { data, error } = await supabase
+      .from('supervisors')
+      .select('id, phone, name')
+      .eq('phone', phone)
+      .eq('password', password)
+      .single();
 
-    if (supervisors.length === 0) {
+    if (error || !data) {
       return res.status(401).json({ error: 'Invalid phone or password' });
     }
 
-    const supervisor = supervisors[0];
     res.json({
       success: true,
       supervisor: {
-        id: supervisor.id,
-        phone: supervisor.phone,
-        name: supervisor.name
+        id: data.id,
+        phone: data.phone,
+        name: data.name
       }
     });
   } catch (err) {

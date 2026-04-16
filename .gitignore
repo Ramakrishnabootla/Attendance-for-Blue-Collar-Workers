@@ -7,7 +7,7 @@ node_modules/
 .env.local
 .env.*.local
 
-
+connection.txt
 
 # Build outputs
 /dist

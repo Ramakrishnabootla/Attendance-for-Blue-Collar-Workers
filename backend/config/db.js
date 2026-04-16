@@ -1,29 +1,18 @@
-const mysql = require('mysql2/promise');
+const { createClient } = require('@supabase/supabase-js');
 require('dotenv').config();
 
 // Read credentials from .env
-const dbPassword = process.env.DB_PASSWORD || '';
-const dbUser = process.env.DB_USER || 'root';
-const dbHost = process.env.DB_HOST || 'localhost';
-const dbName = process.env.DB_NAME || 'bluetrack_db';
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_KEY;
 
-// Database connection pool
-const pool = mysql.createPool({
-  host: dbHost,
-  user: dbUser,
-  password: dbPassword,
-  database: dbName,
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0,
-  timezone: '+00:00',
-  dateStrings: true
-});
+if (!supabaseUrl || !supabaseKey) {
+  console.error('ERROR: SUPABASE_URL and SUPABASE_KEY not set in .env');
+  process.exit(1);
+}
 
-pool.on('error', (err) => {
-  console.error('Database error:', err);
-});
+// Create Supabase client
+const supabase = createClient(supabaseUrl, supabaseKey);
 
-console.log(`📊 Connected to MySQL as: ${dbUser}@${dbHost} (${dbName})`);
+console.log(`📊 Connected to Supabase: ${supabaseUrl}`);
 
-module.exports = { pool };
+module.exports = { supabase };
