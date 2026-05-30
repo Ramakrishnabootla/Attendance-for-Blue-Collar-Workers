@@ -34,7 +34,10 @@ function WorkersPage() {
     worker_id: '',
     name: '',
     phone: '',
-    job_type: 'Construction'
+    job_type: 'Construction',
+    contractor_id: 'C001',
+    contractor_name: 'ABC Contractors',
+    pin: '1234'
   })
 
   // Modal states
@@ -130,7 +133,7 @@ function WorkersPage() {
 
       if (data.success) {
         setMessage('✓ Worker added successfully!')
-        setFormData({ worker_id: '', name: '', phone: '', job_type: 'Construction' })
+        setFormData({ worker_id: '', name: '', phone: '', job_type: 'Construction', contractor_id: 'C001', contractor_name: 'ABC Contractors', pin: '1234' })
         setShowForm(false)
         await loadWorkers()
         setTimeout(() => setMessage(''), 3000)
@@ -156,8 +159,11 @@ function WorkersPage() {
     setEditingWorker(worker)
     setEditFormData({
       name: worker.name,
-      phone: worker.phone,
-      job_type: worker.job_type
+      phone: worker.phone || '',
+      job_type: worker.job_type,
+      contractor_id: worker.contractor_id || 'C001',
+      contractor_name: worker.contractor_name || 'General Contractors',
+      pin: worker.pin || '1234'
     })
     setShowEditModal(true)
   }
@@ -355,6 +361,38 @@ function WorkersPage() {
                 </select>
               </div>
 
+              <div className="form-group">
+                <label>Contractor *</label>
+                <select
+                  value={formData.contractor_id}
+                  onChange={(e) => {
+                    const selectedOpt = e.target.options[e.target.selectedIndex];
+                    setFormData({ 
+                      ...formData, 
+                      contractor_id: e.target.value,
+                      contractor_name: selectedOpt.text
+                    })
+                  }}
+                >
+                  <option value="C001">ABC Contractors</option>
+                  <option value="C002">XYZ Builders</option>
+                  <option value="C003">Global Labour Co</option>
+                  <option value="C004">Elite Construction</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label>Worker PIN (4 Digits) *</label>
+                <input
+                  type="password"
+                  value={formData.pin}
+                  onChange={(e) => setFormData({ ...formData, pin: e.target.value.replace(/\D/g, '') })}
+                  placeholder="1234"
+                  maxLength={4}
+                  required
+                />
+              </div>
+
               <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>
                 Add Worker
               </button>
@@ -388,6 +426,7 @@ function WorkersPage() {
                 <th>Name</th>
                 <th>Phone</th>
                 <th>Job Type</th>
+                <th>Contractor</th>
                 <th style={{ textAlign: 'center' }}>Actions</th>
               </tr>
             </thead>
@@ -414,6 +453,7 @@ function WorkersPage() {
                   <td>{worker.name}</td>
                   <td>{worker.phone || '-'}</td>
                   <td>{worker.job_type}</td>
+                  <td>{worker.contractor_name || 'General Contractors'}</td>
                   <td style={{ textAlign: 'center' }}>
                     <div style={{ display: 'flex', gap: '6px', justifyContent: 'center', flexWrap: 'wrap' }}>
                       {worker.is_active ? (
@@ -530,6 +570,37 @@ function WorkersPage() {
                   <option key={type} value={type}>{type}</option>
                 ))}
               </select>
+            </div>
+
+            <div className="form-group">
+              <label>Contractor *</label>
+              <select
+                value={editFormData.contractor_id}
+                onChange={(e) => {
+                  const selectedOpt = e.target.options[e.target.selectedIndex];
+                  setEditFormData({ 
+                    ...editFormData, 
+                    contractor_id: e.target.value,
+                    contractor_name: selectedOpt.text
+                  })
+                }}
+              >
+                <option value="C001">ABC Contractors</option>
+                <option value="C002">XYZ Builders</option>
+                <option value="C003">Global Labour Co</option>
+                <option value="C004">Elite Construction</option>
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label>Worker PIN (4 Digits) *</label>
+              <input
+                type="password"
+                value={editFormData.pin || ''}
+                onChange={(e) => setEditFormData({ ...editFormData, pin: e.target.value.replace(/\D/g, '') })}
+                placeholder="1234"
+                maxLength={4}
+              />
             </div>
 
             <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '20px' }}>

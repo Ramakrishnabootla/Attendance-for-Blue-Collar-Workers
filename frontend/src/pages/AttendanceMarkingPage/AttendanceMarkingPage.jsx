@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { fetchTodayAttendance, bulkMarkAttendance } from '../../utils/api'
-import { getIndiaTimeNow, formatIndiaTimeWith12Hour, getTodayIndia, formatSecondsToHHMMSS, formatDateReadable, convert12To24 } from '../../utils/timezoneHelper'
+import { getIndiaTimeNow, formatIndiaTimeWith12Hour, getTodayIndia, formatSecondsToHHMMSS, formatDateReadable, convert12To24, detectShiftType } from '../../utils/timezoneHelper'
 import ConfirmReasonModal from '../../components/ConfirmReasonModal'
 import SearchBar from '../../components/SearchBar'
 import './AttendanceMarkingPage.css'
@@ -16,27 +16,37 @@ function AttendanceMarkingPage() {
   const [showReasonModal, setShowReasonModal] = useState(false)
   const [selectedWorkerId, setSelectedWorkerId] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
+  const [selectedShiftFilter, setSelectedShiftFilter] = useState('All')
 
   // Fetch workers and today's attendance
   useEffect(() => {
     loadAttendance()
   }, [])
 
-  // Filter workers based on search query
+  // Filter workers based on search query and shift filter
   useEffect(() => {
-    if (!searchQuery.trim()) {
-      setFilteredWorkers(workers)
-      return
+    let result = workers
+
+    // Filter by shift
+    if (selectedShiftFilter !== 'All') {
+      result = result.filter(w => {
+        const att = attendance[w.worker_id]
+        return att?.status === 'Present' && att?.shift_type === selectedShiftFilter
+      })
     }
 
-    const query = searchQuery.toLowerCase()
-    const filtered = workers.filter(
-      w => w.worker_id.toLowerCase().includes(query) ||
-           w.name.toLowerCase().includes(query) ||
-           w.phone?.toLowerCase().includes(query)
-    )
-    setFilteredWorkers(filtered)
-  }, [searchQuery, workers])
+    // Filter by search query
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase()
+      result = result.filter(
+        w => w.worker_id.toLowerCase().includes(query) ||
+             w.name.toLowerCase().includes(query) ||
+             w.phone?.toLowerCase().includes(query)
+      )
+    }
+
+    setFilteredWorkers(result)
+  }, [searchQuery, selectedShiftFilter, workers, attendance])
 
   const loadAttendance = async () => {
     try {
@@ -54,7 +64,8 @@ function AttendanceMarkingPage() {
           check_in: record.check_in ? formatIndiaTimeWith12Hour(record.check_in) : null,
           check_out: record.check_out ? formatIndiaTimeWith12Hour(record.check_out) : null,
           time_spent_seconds: record.time_spent_seconds || null,
-          absence_reason: record.absence_reason || null
+          absence_reason: record.absence_reason || null,
+          shift_type: record.shift_type || 'General'
         }
       })
       setAttendance(attendanceState)
@@ -82,9 +93,11 @@ function AttendanceMarkingPage() {
         return prev
       } else {
         // Mark as present with check-in time
+        const checkInTime = getIndiaTimeNow()
+        const autoShift = detectShiftType(checkInTime)
         return {
           ...prev,
-          [worker_id]: { status: 'Present', check_in: getIndiaTimeNow(), check_out: null, time_spent_seconds: null, absence_reason: null }
+          [worker_id]: { status: 'Present', check_in: checkInTime, check_out: null, time_spent_seconds: null, absence_reason: null, shift_type: autoShift }
         }
       }
     })
@@ -127,7 +140,8 @@ function AttendanceMarkingPage() {
           worker_id: worker.worker_id,
           status: att?.status || 'Absent',
           check_in: checkIn24 ? `${getTodayIndia()} ${checkIn24}:00` : null,
-          check_out: checkOut24 ? `${getTodayIndia()} ${checkOut24}:00` : null
+          check_out: checkOut24 ? `${getTodayIndia()} ${checkOut24}:00` : null,
+          shift_type: att?.shift_type || 'General'
         }
 
         // Include absence_reason only if Absent
@@ -185,13 +199,41 @@ function AttendanceMarkingPage() {
           </div>
         </div>
 
-        {/* Search Bar */}
+        {/* Search Bar & Shift Filter */}
         {!loading && workers.length > 0 && (
-          <SearchBar
-            value={searchQuery}
-            onChange={setSearchQuery}
-            placeholder="Search by Worker ID, Name, or Phone..."
-          />
+          <div className="search-filter-row" style={{ display: 'flex', gap: '12px', marginBottom: '20px', flexWrap: 'wrap', alignItems: 'center' }}>
+            <div style={{ flex: 1, minWidth: '200px' }}>
+              <SearchBar
+                value={searchQuery}
+                onChange={setSearchQuery}
+                placeholder="Search by Worker ID, Name, or Phone..."
+              />
+            </div>
+            <div style={{ minWidth: '180px' }}>
+              <select
+                value={selectedShiftFilter}
+                onChange={(e) => setSelectedShiftFilter(e.target.value)}
+                style={{
+                  height: '46px',
+                  borderRadius: '10px',
+                  border: '2px solid var(--border-light)',
+                  padding: '0 12px',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  color: 'var(--text-medium)',
+                  backgroundColor: 'white',
+                  width: '100%',
+                  cursor: 'pointer'
+                }}
+              >
+                <option value="All">All Shifts</option>
+                <option value="General">General Shift</option>
+                <option value="Morning">Morning Shift</option>
+                <option value="Evening">Evening Shift</option>
+                <option value="Night">Night Shift</option>
+              </select>
+            </div>
+          </div>
         )}
 
         {loading ? (
@@ -207,6 +249,7 @@ function AttendanceMarkingPage() {
                     <th>Worker ID</th>
                     <th>Name</th>
                     <th>Status</th>
+                    <th>Shift</th>
                     <th>Check-In</th>
                     <th>Check-Out</th>
                     <th>Time Spent</th>
@@ -233,6 +276,36 @@ function AttendanceMarkingPage() {
                           <span className={`status-badge ${isPresent ? 'status-present' : 'status-absent'}`}>
                             {isPresent ? '✓ Present' : '✗ Absent'}
                           </span>
+                        </td>
+                        <td>
+                          {isPresent ? (
+                            <select
+                              value={att?.shift_type || 'General'}
+                              onChange={(e) => {
+                                const val = e.target.value
+                                setAttendance(prev => ({
+                                  ...prev,
+                                  [worker.worker_id]: { ...prev[worker.worker_id], shift_type: val }
+                                }))
+                              }}
+                              className="shift-select"
+                              style={{
+                                padding: '4px 8px',
+                                borderRadius: '6px',
+                                border: '1px solid var(--border-light)',
+                                fontSize: '13px',
+                                fontWeight: '600',
+                                width: '100%',
+                                backgroundColor: 'white',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              <option value="General">General</option>
+                              <option value="Morning">Morning</option>
+                              <option value="Evening">Evening</option>
+                              <option value="Night">Night</option>
+                            </select>
+                          ) : '-'}
                         </td>
                         <td>{att?.check_in || '-'}</td>
                         <td>{att?.check_out || '-'}</td>

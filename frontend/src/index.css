@@ -200,6 +200,18 @@ button:disabled, .btn:disabled {
   box-shadow: 0 8px 25px rgba(71, 85, 105, 0.4);
 }
 
+/* Success / Export Button */
+.btn-success {
+  background: linear-gradient(135deg, var(--success-green) 0%, var(--success-green-dark) 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+}
+
+.btn-success:hover:not(:disabled) {
+  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+  background: linear-gradient(135deg, var(--success-green-light) 0%, var(--success-green) 100%);
+}
+
 /* ===== Forms - Clean & Professional ===== */
 input, select, textarea {
   width: 100%;

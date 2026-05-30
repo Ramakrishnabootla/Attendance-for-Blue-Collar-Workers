@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import { fetchTodayAttendance, getAttendanceStatistics } from '../../utils/api'
-import { formatDateReadable } from '../../utils/timezoneHelper'
+import { formatDateReadable, formatIndiaTimeWith12Hour } from '../../utils/timezoneHelper'
 import './LandingPage.css'
 
 export default function LandingPage() {
@@ -176,8 +176,8 @@ export default function LandingPage() {
                       <td><strong>{record.worker_id}</strong></td>
                       <td>{record.name}</td>
                       <td><span className="job-badge">{record.job_type}</span></td>
-                      <td>{record.check_in ? new Date(record.check_in).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'Asia/Kolkata' }) : '-'}</td>
-                      <td>{record.check_out ? new Date(record.check_out).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'Asia/Kolkata' }) : '-'}</td>
+                      <td>{record.check_in ? formatIndiaTimeWith12Hour(record.check_in) : '-'}</td>
+                      <td>{record.check_out ? formatIndiaTimeWith12Hour(record.check_out) : '-'}</td>
                       <td>
                         <span className={`status-badge ${record.status.toLowerCase()}`}>
                           {record.status === 'Present' ? '✓ Present' : '✕ Absent'}

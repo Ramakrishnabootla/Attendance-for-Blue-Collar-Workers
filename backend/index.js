@@ -6,6 +6,8 @@ const cors = require('cors');
 const authRoutes = require('./routes/authRoutes');
 const workerRoutes = require('./routes/workerRoutes');
 const attendanceRoutes = require('./routes/attendanceRoutes');
+const mlRoutes = require('./routes/mlRoutes');
+const aiRoutes = require('./routes/aiRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -18,6 +20,8 @@ app.use(express.json());
 app.use('/api', authRoutes);
 app.use('/api', workerRoutes);
 app.use('/api', attendanceRoutes);
+app.use('/api/ml', mlRoutes);
+app.use('/api/ai', aiRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

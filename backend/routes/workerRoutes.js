@@ -7,7 +7,9 @@ const {
   getNextWorkerId,
   updateWorker,
   deactivateWorker,
-  activateWorker
+  activateWorker,
+  getWorkerByWorkerId,
+  getContractors
 } = require('../controllers/workerController');
 
 // GET /api/workers - List all workers
@@ -18,6 +20,12 @@ router.get('/workers/search', searchWorkers);
 
 // GET /api/workers/next-id - Get next worker ID
 router.get('/workers/next-id', getNextWorkerId);
+
+// GET /api/workers/profile/:worker_id - Get single worker details by worker_id
+router.get('/workers/profile/:worker_id', getWorkerByWorkerId);
+
+// GET /api/contractors - Dynamic list of registered contractors
+router.get('/contractors', getContractors);
 
 // POST /api/workers - Create new worker
 router.post('/workers', createWorker);
