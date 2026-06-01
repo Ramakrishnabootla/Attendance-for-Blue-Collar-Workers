@@ -5,13 +5,12 @@ import './MLPredictions.css';
 const MLPredictions = ({ contractorId }) => {
   const [predictions, setPredictions] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [generating, setGenerating] = useState(false);
   const [error, setError] = useState(null);
   const [filterRisk, setFilterRisk] = useState('all'); // all, high, medium, low
 
   useEffect(() => {
-    if (contractorId) {
-      fetchPredictions();
-    }
+    fetchPredictions();
   }, [contractorId]);
 
   const fetchPredictions = async () => {
@@ -19,50 +18,61 @@ const MLPredictions = ({ contractorId }) => {
       setLoading(true);
       setError(null);
 
-      // Fetch workers first
-      const workersRes = await fetch(`${API_BASE_URL}/workers?contractor_id=${contractorId}`, {
+      const res = await fetch(`${API_BASE_URL}/ml/predictions`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
       });
 
-      if (!workersRes.ok) throw new Error('Failed to fetch workers');
+      if (!res.ok) throw new Error('Failed to fetch predictions');
 
-      const workersData = await workersRes.json();
-      const workers = workersData.data || [];
+      const data = await res.json();
+      const items = data.predictions || [];
 
-      // Fetch predictions for each worker
-      const predictionsData = await Promise.all(
-        workers.map(async (worker) => {
-          try {
-            const res = await fetch(`${API_BASE_URL}/ml/worker/${worker.id}/prediction`, {
-              headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-              }
-            });
-
-            if (res.ok) {
-              const data = await res.json();
-              return {
-                worker_id: worker.id,
-                worker_name: worker.name,
-                ...data.prediction,
-                statistics: data.statistics
-              };
-            }
-            return null;
-          } catch (err) {
-            return null;
-          }
-        })
-      );
-
-      setPredictions(predictionsData.filter(p => p !== null));
+      setPredictions(items.map(item => ({
+        worker_id: item.worker_id,
+        worker_name: item.name,
+        category: item.prediction?.category || 'Insufficient Data',
+        confidence: item.prediction?.confidence || 0.0,
+        risk_level: item.prediction?.risk_level || 'UNKNOWN',
+        recommendations: item.prediction?.recommendations || [],
+        statistics: {
+          attendance_rate: item.prediction?.attendance_rate || 100.0,
+          late_arrivals: item.prediction?.late_arrivals || 0,
+          absences_30d: item.prediction?.days_recorded ? (30 - item.prediction.days_recorded) : 0
+        },
+        calculated_at: item.prediction?.calculated_at
+      })));
     } catch (err) {
       setError(err.message);
       console.error('Error fetching predictions:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const generatePredictions = async () => {
+    try {
+      setGenerating(true);
+      setError(null);
+
+      const res = await fetch(`${API_BASE_URL}/ml/predictions/generate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+
+      if (!res.ok) throw new Error('Failed to generate predictions');
+
+      // Refresh list after generation
+      await fetchPredictions();
+    } catch (err) {
+      setError(err.message);
+      console.error('Error generating predictions:', err);
+    } finally {
+      setGenerating(false);
     }
   };
 
@@ -100,6 +110,18 @@ const MLPredictions = ({ contractorId }) => {
     );
   }
 
+  if (generating) {
+    return (
+      <div className="ml-predictions-container">
+        <div className="loading">
+          <div className="spinner"></div>
+          <p style={{ fontWeight: 'bold', color: 'var(--primary-blue)' }}>⚡ AI Engine executing model predictions...</p>
+          <p style={{ fontSize: '13px', color: 'var(--text-light)', marginTop: '8px' }}>Aggregating supervisor punch logs & calculating workforce risk matrices...</p>
+        </div>
+      </div>
+    );
+  }
+
   if (error) {
     return (
       <div className="ml-predictions-container">
@@ -112,17 +134,34 @@ const MLPredictions = ({ contractorId }) => {
     <div className="ml-predictions-container">
       <div className="predictions-header">
         <h2>🧠 Worker Behavior Predictions</h2>
-        <div className="controls">
+        <div className="controls" style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
           <select
             value={filterRisk}
             onChange={(e) => setFilterRisk(e.target.value)}
             className="risk-filter"
+            style={{ padding: '8px 12px', borderRadius: '4px', border: '1px solid #ccc' }}
           >
             <option value="all">All Risk Levels</option>
             <option value="low">Low Risk</option>
             <option value="medium">Medium Risk</option>
             <option value="high">High Risk</option>
           </select>
+          <button 
+            onClick={generatePredictions} 
+            className="btn btn-primary"
+            style={{ 
+              backgroundColor: '#3b82f6', 
+              color: 'white', 
+              border: 'none', 
+              padding: '8px 16px', 
+              borderRadius: '4px', 
+              fontWeight: 'bold', 
+              cursor: 'pointer',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+            }}
+          >
+            🧠 Run AI Predictor
+          </button>
           <button onClick={fetchPredictions} className="refresh-btn">
             ⟳ Refresh
           </button>

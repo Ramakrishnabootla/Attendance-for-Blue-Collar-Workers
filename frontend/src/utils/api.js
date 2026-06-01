@@ -135,6 +135,15 @@ export const fetchMLPredictions = async () => {
   return response.json();
 };
 
+// Generate ML worker attendance behavior predictions and save to database cache
+export const generateMLPredictions = async () => {
+  const response = await fetch(`${API_URL}/ml/predictions/generate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' }
+  });
+  return response.json();
+};
+
 // Fetch ML prediction for a specific worker
 export const fetchWorkerMLPrediction = async (worker_id) => {
   const response = await fetch(`${API_URL}/ml/worker/${worker_id}/prediction`);

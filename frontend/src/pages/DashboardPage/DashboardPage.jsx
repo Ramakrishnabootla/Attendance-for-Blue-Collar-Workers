@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { fetchTodayAttendance, getAttendanceByDateRange, fetchMLPredictions } from '../../utils/api'
+import { fetchTodayAttendance, getAttendanceByDateRange, fetchMLPredictions, generateMLPredictions } from '../../utils/api'
 import { getTodayIndia, formatDateReadable, formatSecondsToHHMMSS, formatIndiaTimeWith12Hour } from '../../utils/timezoneHelper'
 import SearchBar from '../../components/SearchBar'
 import DateRangeSelector from '../../components/DateRangeSelector'
@@ -67,6 +67,23 @@ function DashboardPage() {
         setMlPredictions(response.predictions || [])
       } else {
         setMlError(response.error || 'Failed to load ML predictions')
+      }
+    } catch (err) {
+      setMlError('Failed to connect to ML prediction service')
+    } finally {
+      setMlLoading(false)
+    }
+  }
+
+  const handleReRunPredictions = async () => {
+    try {
+      setMlLoading(true)
+      setMlError('')
+      const response = await generateMLPredictions()
+      if (response.success) {
+        setMlPredictions(response.predictions || [])
+      } else {
+        setMlError(response.error || 'Failed to generate ML predictions')
       }
     } catch (err) {
       setMlError('Failed to connect to ML prediction service')
@@ -485,7 +502,7 @@ function DashboardPage() {
               </div>
               <button 
                 className="btn btn-outline" 
-                onClick={loadMLPredictions} 
+                onClick={handleReRunPredictions} 
                 disabled={mlLoading}
                 style={{ height: '46px', minWidth: '220px' }}
               >
@@ -517,10 +534,10 @@ function DashboardPage() {
                       {mlPredictions.filter(p => {
                         if (!mlSearchQuery.trim()) return true;
                         const q = mlSearchQuery.toLowerCase();
-                        return p.worker_id.toLowerCase().includes(q) ||
-                               p.name.toLowerCase().includes(q) ||
-                               p.prediction.category.toLowerCase().includes(q) ||
-                               p.prediction.risk_level.toLowerCase().includes(q);
+                        return (p.worker_id || '').toLowerCase().includes(q) ||
+                               (p.name || '').toLowerCase().includes(q) ||
+                               (p.prediction?.category || '').toLowerCase().includes(q) ||
+                               (p.prediction?.risk_level || '').toLowerCase().includes(q);
                       }).length === 0 ? (
                         <tr>
                           <td colSpan="7" style={{ textAlign: 'center', padding: '30px', color: 'var(--text-light)', fontStyle: 'italic' }}>No predictions matched your filters.</td>
@@ -529,10 +546,10 @@ function DashboardPage() {
                         mlPredictions.filter(p => {
                           if (!mlSearchQuery.trim()) return true;
                           const q = mlSearchQuery.toLowerCase();
-                          return p.worker_id.toLowerCase().includes(q) ||
-                                 p.name.toLowerCase().includes(q) ||
-                                 p.prediction.category.toLowerCase().includes(q) ||
-                                 p.prediction.risk_level.toLowerCase().includes(q);
+                          return (p.worker_id || '').toLowerCase().includes(q) ||
+                                 (p.name || '').toLowerCase().includes(q) ||
+                                 (p.prediction?.category || '').toLowerCase().includes(q) ||
+                                 (p.prediction?.risk_level || '').toLowerCase().includes(q);
                         }).map((p) => {
                           const categoryName = p.prediction.category === 'High_Risk' 
                             ? 'High Absence Risk' 

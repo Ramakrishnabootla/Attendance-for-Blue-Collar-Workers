@@ -30,8 +30,14 @@ router.post('/batch-predict', mlController.batchPrediction);
 
 /**
  * GET /api/ml/predictions
- * Get batch predictions for all active workers
+ * Get batch predictions for all active workers from the database cache
  */
 router.get('/predictions', mlController.getAllWorkerPredictions);
+
+/**
+ * POST /api/ml/predictions/generate
+ * Supervisor-only action to generate fresh predictions and write them to database
+ */
+router.post('/predictions/generate', mlController.generateAllWorkerPredictions);
 
 module.exports = router;
