@@ -97,3 +97,56 @@ export const bulkMarkAttendance = async (records) => {
   });
   return response.json();
 };
+
+// Worker Login
+export const loginWorker = async (worker_id, phone, pin) => {
+  const response = await fetch(`${API_URL}/worker-login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ worker_id, phone, pin })
+  });
+  return response.json();
+};
+
+// Fetch Worker personal attendance logs
+export const fetchWorkerAttendance = async (worker_id) => {
+  const response = await fetch(`${API_URL}/workers/${worker_id}/attendance`);
+  return response.json();
+};
+
+// Fetch unread notifications for a specific worker
+export const fetchNotifications = async (worker_id) => {
+  const response = await fetch(`${API_URL}/workers/${worker_id}/notifications`);
+  return response.json();
+};
+
+// Dismiss all notifications for a specific worker
+export const dismissNotifications = async (worker_id) => {
+  const response = await fetch(`${API_URL}/workers/${worker_id}/notifications/dismiss`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' }
+  });
+  return response.json();
+};
+
+// Fetch ML worker attendance behavior predictions and risk levels
+export const fetchMLPredictions = async () => {
+  const response = await fetch(`${API_URL}/ml/predictions`);
+  return response.json();
+};
+
+// Generate ML worker attendance behavior predictions and save to database cache
+export const generateMLPredictions = async () => {
+  const response = await fetch(`${API_URL}/ml/predictions/generate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' }
+  });
+  return response.json();
+};
+
+// Fetch ML prediction for a specific worker
+export const fetchWorkerMLPrediction = async (worker_id) => {
+  const response = await fetch(`${API_URL}/ml/worker/${worker_id}/prediction`);
+  return response.json();
+};
+

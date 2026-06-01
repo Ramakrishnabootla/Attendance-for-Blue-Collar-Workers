@@ -2,46 +2,66 @@ import React, { useState } from 'react';
 import { getTodayIndia } from '../utils/timezoneHelper';
 import './DateRangeSelector.css';
 
-export default function DateRangeSelector({ onDateSelect, onCancel }) {
-  const [selectedDate, setSelectedDate] = useState(getTodayIndia());
-  const [view, setView] = useState('calendar'); // 'calendar' or 'input'
-
-  const handleDateChange = (date) => {
-    setSelectedDate(date);
-  };
+export default function DateRangeSelector({ onDateRangeSelect, onCancel }) {
+  const [startDate, setStartDate] = useState(() => {
+    const d = new Date(getTodayIndia());
+    d.setDate(d.getDate() - 29); // default 30 days range
+    return d.toISOString().split('T')[0];
+  });
+  const [endDate, setEndDate] = useState(getTodayIndia());
 
   const handleApply = () => {
-    if (selectedDate) {
-      onDateSelect(selectedDate);
+    if (startDate && endDate) {
+      if (startDate > endDate) {
+        alert('Start date cannot be after End date');
+        return;
+      }
+      onDateRangeSelect(startDate, endDate);
     }
   };
 
   const handleToday = () => {
     const today = getTodayIndia();
-    setSelectedDate(today);
-    onDateSelect(today);
+    setStartDate(today);
+    setEndDate(today);
+    onDateRangeSelect(today, today);
   };
 
   const handleYesterday = () => {
     const today = new Date(getTodayIndia());
     today.setDate(today.getDate() - 1);
     const yesterday = today.toISOString().split('T')[0];
-    setSelectedDate(yesterday);
-    onDateSelect(yesterday);
+    setStartDate(yesterday);
+    setEndDate(yesterday);
+    onDateRangeSelect(yesterday, yesterday);
   };
 
   const handleLast7Days = () => {
     const today = new Date(getTodayIndia());
-    const startDate = new Date(today);
-    startDate.setDate(startDate.getDate() - 6);
-    const start = startDate.toISOString().split('T')[0];
-    onDateSelect(start, getTodayIndia());
+    const start = new Date(today);
+    start.setDate(start.getDate() - 6);
+    const startStr = start.toISOString().split('T')[0];
+    const endStr = getTodayIndia();
+    setStartDate(startStr);
+    setEndDate(endStr);
+    onDateRangeSelect(startStr, endStr);
+  };
+
+  const handleLast30Days = () => {
+    const today = new Date(getTodayIndia());
+    const start = new Date(today);
+    start.setDate(start.getDate() - 29);
+    const startStr = start.toISOString().split('T')[0];
+    const endStr = getTodayIndia();
+    setStartDate(startStr);
+    setEndDate(endStr);
+    onDateRangeSelect(startStr, endStr);
   };
 
   return (
     <div className="date-range-selector">
       <div className="date-range-header">
-        <h4>Select Date</h4>
+        <h4>Select Date Range</h4>
         <button className="date-range-close" onClick={onCancel}>✕</button>
       </div>
 
@@ -56,21 +76,32 @@ export default function DateRangeSelector({ onDateSelect, onCancel }) {
           <button className="date-range-quick-btn" onClick={handleLast7Days}>
             Last 7 Days
           </button>
+          <button className="date-range-quick-btn" onClick={handleLast30Days}>
+            Last 30 Days
+          </button>
         </div>
 
         <div className="date-range-divider"></div>
 
-        <div className="date-range-input-group">
-          <label>Select Date:</label>
-          <input
-            type="date"
-            value={selectedDate}
-            onChange={(e) => handleDateChange(e.target.value)}
-            className="date-range-input"
-          />
-          <p className="date-range-info">
-            Showing workers created on: <strong>{new Date(selectedDate + 'T00:00:00').toLocaleDateString('en-IN')}</strong>
-          </p>
+        <div className="date-range-input-row" style={{ display: 'flex', gap: '12px', marginBottom: '12px' }}>
+          <div className="date-range-input-group" style={{ flex: 1 }}>
+            <label>Start Date:</label>
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="date-range-input"
+            />
+          </div>
+          <div className="date-range-input-group" style={{ flex: 1 }}>
+            <label>End Date:</label>
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="date-range-input"
+            />
+          </div>
         </div>
       </div>
 
@@ -79,7 +110,7 @@ export default function DateRangeSelector({ onDateSelect, onCancel }) {
           Cancel
         </button>
         <button className="btn-primary" onClick={handleApply}>
-          Apply Filter
+          Apply Range
         </button>
       </div>
     </div>

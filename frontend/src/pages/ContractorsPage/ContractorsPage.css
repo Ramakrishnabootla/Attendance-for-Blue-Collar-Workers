@@ -1,0 +1,222 @@
+/* Contractors page - Premium Modern Theme */
+
+.contractors-container {
+  padding: var(--spacing-xl) var(--spacing-md);
+  background-color: var(--bg-light);
+  min-height: 100vh;
+}
+
+.contractors-header {
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--text-dark);
+  margin-bottom: var(--spacing-xs);
+  letter-spacing: -0.5px;
+}
+
+.contractors-subheader {
+  font-size: 15px;
+  color: var(--text-light);
+  margin-bottom: var(--spacing-lg);
+  font-weight: 500;
+}
+
+.contractor-stats-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.contractor-stat-card {
+  padding: var(--spacing-lg) var(--spacing-md);
+  text-align: center;
+  border-top: 4px solid var(--primary-blue-light);
+}
+
+.contractor-stat-card.present-card {
+  border-top-color: var(--success-green);
+}
+
+.contractor-stat-card.hours-card {
+  border-top-color: var(--warning-yellow);
+}
+
+.contractor-stat-card.percentage-card {
+  border-top-color: var(--primary-blue);
+}
+
+.contractor-stat-card h3 {
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--text-dark);
+  margin-bottom: 4px;
+}
+
+.contractor-stat-card p {
+  font-size: 13px;
+  color: var(--text-light);
+  margin: 0;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+/* Grid Layout */
+.contractors-grid-layout {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.contractors-table-card {
+  padding: var(--spacing-lg);
+}
+
+.contractors-table-card h3 {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: var(--spacing-md);
+}
+
+.contractor-row-interactive {
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.contractor-row-interactive:hover {
+  background-color: var(--bg-lighter) !important;
+  transform: translateY(-2px);
+}
+
+.contractor-row-interactive.active-row {
+  background-color: rgba(37, 99, 235, 0.05) !important;
+  border-left: 4px solid var(--primary-blue);
+}
+
+.status-pill {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.status-pill.some-present {
+  background-color: #ECFDF5;
+  color: var(--success-green-dark);
+  border: 1px solid #A7F3D0;
+}
+
+.status-pill.none-present {
+  background-color: #FEF2F2;
+  color: var(--danger-red-dark);
+  border: 1px solid #FCA5A5;
+}
+
+/* Attendance Progress Bar */
+.attendance-bar-container {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 140px;
+}
+
+.rate-text {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-dark);
+}
+
+.attendance-bar-outer {
+  width: 100%;
+  height: 6px;
+  background-color: var(--border-light);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.attendance-bar-inner {
+  height: 100%;
+  border-radius: var(--radius-full);
+  transition: width 0.6s ease;
+}
+
+/* Drill-Down Details Panel */
+.contractor-detail-card {
+  padding: var(--spacing-lg);
+  border-top: 4px solid var(--primary-blue);
+  animation: slideInDown 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.detail-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-md);
+  border-bottom: 1px solid var(--border-light);
+  padding-bottom: var(--spacing-sm);
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+}
+
+.detail-header h3 {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
+  margin-bottom: 2px;
+}
+
+.detail-header .subtext {
+  font-size: 13px;
+  color: var(--text-light);
+  margin: 0;
+  font-weight: 500;
+}
+
+.close-detail-btn {
+  font-size: 13px;
+  padding: 8px 16px;
+  min-height: 36px;
+  min-width: unset;
+}
+
+.contractor-workers-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.row-present-bg {
+  border-left: 4px solid var(--success-green);
+}
+
+.row-absent-bg {
+  border-left: 4px solid var(--danger-red);
+}
+
+.shift-pill {
+  display: inline-block;
+  padding: 2px 8px;
+  background-color: var(--bg-light);
+  border: 1px solid var(--border-light);
+  color: var(--text-medium);
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 4px;
+}
+
+/* Slide-in animation */
+.slide-in-animation {
+  animation: slideInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
