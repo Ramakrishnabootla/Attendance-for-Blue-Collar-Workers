@@ -25,7 +25,7 @@ exports.generateInsights = async (req, res) => {
       });
     }
 
-    const { supabase } = req;
+    const { supabase } = require('../config/db');
 
     // Fetch attendance data for the period
     const attendanceData = await fetchAttendanceData(supabase, contractor_id, period, worker_ids);
@@ -78,7 +78,7 @@ exports.getContractorInsights = async (req, res) => {
       });
     }
 
-    const { supabase } = req;
+    const { supabase } = require('../config/db');
 
     // Fetch attendance data
     const attendanceData = await fetchAttendanceData(supabase, contractorId, period);
@@ -130,6 +130,63 @@ exports.getContractorInsights = async (req, res) => {
 };
 
 /**
+ * Generate insights for a specific worker
+ */
+exports.getWorkerInsights = async (req, res) => {
+  try {
+    const { workerId } = req.params;
+    const { period = 'monthly' } = req.query;
+
+    if (!workerId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Worker ID is required'
+      });
+    }
+
+    const { supabase } = require('../config/db');
+
+    // Fetch attendance data for the worker
+    const attendanceData = await fetchAttendanceData(supabase, 'all', period, [workerId]);
+
+    if (!attendanceData || attendanceData.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'No attendance data found for this worker'
+      });
+    }
+
+    // Calculate statistics
+    const stats = calculateAttendanceStats(attendanceData);
+
+    // Generate AI insights using the same generative pipeline but tweaked prompt (done within buildAIPrompt if needed, but we can reuse it)
+    const insights = await generateAIInsights(stats, period);
+
+    res.json({
+      success: true,
+      worker_id: workerId,
+      period,
+      timestamp: new Date().toISOString(),
+      summary: {
+        total_present: stats.total_present,
+        total_absent: stats.total_absent,
+        avg_attendance_rate: stats.avg_attendance_rate.toFixed(2),
+        on_time_percentage: stats.on_time_percentage.toFixed(2)
+      },
+      insights: insights
+    });
+
+  } catch (error) {
+    console.error('Worker insights error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to get worker insights',
+      details: error.message
+    });
+  }
+};
+
+/**
  * Helper: Fetch attendance data from Supabase
  */
 async function fetchAttendanceData(supabase, contractorId, period, workerIds = null) {
@@ -137,24 +194,40 @@ async function fetchAttendanceData(supabase, contractorId, period, workerIds = n
     // Calculate date range
     const { startDate, endDate } = getDateRange(period);
 
-    let query = supabase
+    // 1. Get workers for this contractor
+    let workersQuery = supabase.from('workers').select('worker_id');
+    if (contractorId && contractorId !== 'all') {
+       workersQuery = workersQuery.eq('contractor_id', contractorId);
+    }
+    
+    if (workerIds && workerIds.length > 0) {
+      workersQuery = workersQuery.in('worker_id', workerIds);
+    }
+
+    const { data: workers, error: workersError } = await workersQuery;
+    if (workersError) throw workersError;
+
+    if (!workers || workers.length === 0) return [];
+    
+    const validWorkerIds = workers.map(w => w.worker_id);
+
+    // 2. Fetch attendance for those workers
+    // Ensure we are comparing dates in YYYY-MM-DD format as the 'date' column is of type DATE
+    const startDateStr = startDate.toISOString().split('T')[0];
+    const endDateStr = endDate.toISOString().split('T')[0];
+
+    const { data: attendanceData, error: attendanceError } = await supabase
       .from('attendance')
       .select('*')
-      .eq('contractor_id', contractorId)
-      .gte('date', startDate.toISOString())
-      .lte('date', endDate.toISOString());
+      .in('worker_id', validWorkerIds)
+      .gte('date', startDateStr)
+      .lte('date', endDateStr);
 
-    if (workerIds && workerIds.length > 0) {
-      query = query.in('worker_id', workerIds);
+    if (attendanceError) {
+      throw attendanceError;
     }
 
-    const { data, error } = await query;
-
-    if (error) {
-      throw error;
-    }
-
-    return data;
+    return attendanceData;
   } catch (error) {
     throw new Error(`Failed to fetch attendance data: ${error.message}`);
   }
@@ -211,9 +284,9 @@ function calculateAttendanceStats(attendanceData) {
 async function generateAIInsights(stats, period) {
   try {
     const apiKey = process.env.AI_API_KEY;
-    const aiProvider = process.env.AI_PROVIDER || 'grok';
+    const aiProvider = process.env.AI_PROVIDER || 'groq';
 
-    if (!apiKey) {
+    if (!apiKey || apiKey === 'test_key_for_demo') {
       return getFallbackInsights(stats, period);
     }
 
@@ -223,7 +296,7 @@ async function generateAIInsights(stats, period) {
     } else if (aiProvider === 'gemini') {
       return await callGemini(stats, period, apiKey);
     } else {
-      return await callGrokAPI(stats, period, apiKey);
+      return await callGroqAPI(stats, period, apiKey);
     }
 
   } catch (error) {
@@ -233,20 +306,20 @@ async function generateAIInsights(stats, period) {
 }
 
 /**
- * Helper: Call Grok API
+ * Helper: Call Groq API
  */
-async function callGrokAPI(stats, period, apiKey) {
+async function callGroqAPI(stats, period, apiKey) {
   try {
     const prompt = buildAIPrompt(stats, period);
 
-    const response = await fetch('https://api.x.ai/v1/chat/completions', {
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${apiKey}`
       },
       body: JSON.stringify({
-        model: 'grok-beta',
+        model: 'llama-3.1-8b-instant',
         messages: [
           {
             role: 'system',
@@ -263,14 +336,16 @@ async function callGrokAPI(stats, period, apiKey) {
     });
 
     if (!response.ok) {
-      throw new Error(`Grok API error: ${response.statusText}`);
+      const errorText = await response.text();
+      console.error(`Groq API error text: ${errorText}`);
+      throw new Error(`Groq API error: ${response.statusText}`);
     }
 
     const data = await response.json();
     return data.choices[0].message.content;
 
   } catch (error) {
-    console.error('Grok API call failed:', error.message);
+    console.error('Groq API call failed:', error.message);
     return getFallbackInsights(stats, period);
   }
 }
@@ -364,7 +439,7 @@ async function callGemini(stats, period, apiKey) {
  */
 function buildAIPrompt(stats, period) {
   return `
-Analyze the following workforce attendance data and provide 2-3 key insights and actionable recommendations.
+Analyze the following workforce attendance data:
 
 Period: ${period}
 Total Workers: ${stats.total_workers}
@@ -378,7 +453,7 @@ High-Risk Workers: ${stats.high_risk_workers}
 Avg Hours/Worker: ${stats.avg_hours_worked.toFixed(2)}
 Total Overtime Hours: ${stats.total_overtime.toFixed(2)}
 
-Provide insights in a professional tone suitable for management review. Format as 2-3 paragraphs.
+Provide a highly concise 2-line insightful summary of this attendance performance. Do not include introductory text, just the 2 lines of insight.
 `;
 }
 
@@ -389,7 +464,7 @@ function getFallbackInsights(stats, period) {
   const attendance_pct = stats.avg_attendance_rate.toFixed(2);
   const ontime_pct = stats.on_time_percentage.toFixed(2);
 
-  return `During the ${period} period, your workforce maintained an overall attendance rate of ${attendance_pct}%, with ${ontime_pct}% of workers arriving on time. With ${stats.regular_workers} regular workers, ${stats.irregular_workers} workers showing irregular patterns, and ${stats.high_risk_workers} workers at risk, the team is performing at a consistent level. The average worker completed ${stats.avg_hours_worked.toFixed(2)} hours and accumulated ${stats.total_overtime.toFixed(2)} overtime hours collectively. Focus on supporting the irregular and high-risk worker segments to improve overall attendance consistency.`;
+  return `Attendance rate is ${attendance_pct}%, with ${ontime_pct}% on-time arrivals, indicating a consistent performance level. Focus on supporting the ${stats.irregular_workers} irregular and ${stats.high_risk_workers} high-risk workers to further improve consistency.`;
 }
 
 /**

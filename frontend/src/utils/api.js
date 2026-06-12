@@ -149,4 +149,10 @@ export const fetchWorkerMLPrediction = async (worker_id) => {
   const response = await fetch(`${API_URL}/ml/worker/${worker_id}/prediction`);
   return response.json();
 };
+// Fetch AI insights for a specific worker
+export const fetchWorkerInsights = async (worker_id) => {
+  const response = await fetch(`${API_URL}/ai/worker/${worker_id}/insights`);
+  return response.json();
+};
 
+export { API_URL as API_BASE_URL };

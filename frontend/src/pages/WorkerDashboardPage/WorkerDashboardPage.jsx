@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { fetchWorkerAttendance, fetchNotifications, dismissNotifications, fetchWorkerMLPrediction } from '../../utils/api'
+import { fetchWorkerAttendance, fetchNotifications, dismissNotifications, fetchWorkerMLPrediction, fetchWorkerInsights } from '../../utils/api'
 import { getTodayIndia, formatDateReadable, formatIndiaTimeWith12Hour, formatSecondsToHHMMSS } from '../../utils/timezoneHelper'
 import './WorkerDashboardPage.css'
 
@@ -12,6 +12,7 @@ function WorkerDashboardPage({ worker, onLogout }) {
   const [activeTab, setActiveTab] = useState('history')
   const [mlData, setMlData] = useState(null)
   const [loadingMl, setLoadingMl] = useState(false)
+  const [aiInsights, setAiInsights] = useState(null)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -19,6 +20,7 @@ function WorkerDashboardPage({ worker, onLogout }) {
       loadWorkerHistory()
       loadWorkerNotifications()
       loadWorkerMLData()
+      loadWorkerAIInsights()
     }
   }, [worker])
 
@@ -45,6 +47,17 @@ function WorkerDashboardPage({ worker, onLogout }) {
       console.error('Failed to load ML prediction:', err)
     } finally {
       setLoadingMl(false)
+    }
+  }
+
+  const loadWorkerAIInsights = async () => {
+    try {
+      const data = await fetchWorkerInsights(worker.worker_id)
+      if (data.success) {
+        setAiInsights(data)
+      }
+    } catch (err) {
+      console.error('Failed to load AI insights:', err)
     }
   }
 
@@ -311,6 +324,16 @@ function WorkerDashboardPage({ worker, onLogout }) {
               </div>
             ) : (
                   <>
+                    {/* Gen AI Insights */}
+                    {aiInsights && aiInsights.insights && (
+                      <div className="card" style={{ marginBottom: '20px', background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)', border: '1px solid #bbf7d0' }}>
+                        <h3 style={{ color: '#166534', marginBottom: '10px' }}>🤖 Generative AI Performance Insight</h3>
+                        <p style={{ color: '#15803d', fontSize: '15px', fontWeight: '500', lineHeight: '1.6' }}>
+                          {aiInsights.insights}
+                        </p>
+                      </div>
+                    )}
+
                     {/* Insights Hero Banner */}
                     <div className="ml-insights-hero">
                       <div className="hero-left">
