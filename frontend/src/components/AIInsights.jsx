@@ -136,105 +136,17 @@ const AIInsights = ({ contractorId, period = 'weekly' }) => {
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="tabs">
-        <button
-          className={`tab-btn ${activeTab === 'overview' ? 'active' : ''}`}
-          onClick={() => setActiveTab('overview')}
-        >
-          Overview
-        </button>
-        <button
-          className={`tab-btn ${activeTab === 'performers' ? 'active' : ''}`}
-          onClick={() => setActiveTab('performers')}
-        >
-          Top Performers
-        </button>
-        <button
-          className={`tab-btn ${activeTab === 'concerns' ? 'active' : ''}`}
-          onClick={() => setActiveTab('concerns')}
-        >
-          Needs Attention
-        </button>
-        <button
-          className={`tab-btn ${activeTab === 'recommendations' ? 'active' : ''}`}
-          onClick={() => setActiveTab('recommendations')}
-        >
-          Recommendations
-        </button>
-      </div>
-
-      {/* Tab Content */}
-      <div className="tab-content">
-        {activeTab === 'overview' && (
-          <div className="insights-section">
-            <div className="card insights-card">
-              <h3>📝 AI Generated Insights</h3>
-              <p className="insights-text">{insights.insights}</p>
-              <div className="timestamp">
-                Generated: {new Date(insights.timestamp).toLocaleString()}
-              </div>
-            </div>
+      {/* AI Generated Insights Section */}
+      <div className="insights-section" style={{ marginTop: '24px' }}>
+        <div className="card insights-card" style={{ background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)', border: '1px solid #bbf7d0' }}>
+          <h3 style={{ color: '#166534', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>📝 Generative AI Performance Insight</h3>
+          <p className="insights-text" style={{ color: '#15803d', fontSize: '16px', fontWeight: '500', lineHeight: '1.6' }}>
+            {insights.insights}
+          </p>
+          <div className="timestamp" style={{ marginTop: '16px', fontSize: '12px', color: '#166534', opacity: 0.8 }}>
+            Generated: {new Date(insights.timestamp).toLocaleString()}
           </div>
-        )}
-
-        {activeTab === 'performers' && (
-          <div className="insights-section">
-            <h3>🌟 Top Performers</h3>
-            <div className="performers-list">
-              {insights.highlights.top_performers.map((worker, idx) => (
-                <div key={idx} className="card performer-card">
-                  <div className="rank">{idx + 1}</div>
-                  <div className="performer-info">
-                    <h4>{worker.name}</h4>
-                    <p>Attendance: <span className="metric">{worker.attendance_rate}%</span></p>
-                    <span className="status-badge excellent">{worker.status}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'concerns' && (
-          <div className="insights-section">
-            <h3>⚠️ Needs Attention</h3>
-            <div className="concerns-list">
-              {insights.highlights.concerns.map((worker, idx) => (
-                <div key={idx} className="card concern-card">
-                  <div className="rank">{idx + 1}</div>
-                  <div className="concern-info">
-                    <h4>{worker.name}</h4>
-                    <p>Attendance: <span className="metric">{worker.attendance_rate}%</span></p>
-                    <p>Late Days: <span className="metric">{worker.late_count}</span></p>
-                    <span className="status-badge warning">{worker.status}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'recommendations' && (
-          <div className="insights-section">
-            <h3>💡 Data-Driven Recommendations</h3>
-            <div className="recommendations-list">
-              {insights.recommendations.map((rec, idx) => (
-                <div key={idx} className="card recommendation-card">
-                  <div className={`priority-badge ${rec.priority.toLowerCase()}`}>
-                    {rec.priority}
-                  </div>
-                  <div className="recommendation-text">
-                    <p>{rec.suggestion}</p>
-                  </div>
-                </div>
-              ))}
-              {insights.recommendations.length === 0 && (
-                <p className="no-issues">✓ No immediate recommendations - keep up the good work!</p>
-              )}
-            </div>
-          </div>
-        )}
+        </div>
       </div>
     </div>
   );
