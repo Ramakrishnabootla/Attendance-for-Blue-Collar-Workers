@@ -3,6 +3,7 @@ import { fetchTodayAttendance, getAttendanceByDateRange, fetchMLPredictions, gen
 import { getTodayIndia, formatDateReadable, formatSecondsToHHMMSS, formatIndiaTimeWith12Hour } from '../../utils/timezoneHelper'
 import SearchBar from '../../components/SearchBar'
 import DateRangeSelector from '../../components/DateRangeSelector'
+import AIInsights from '../../components/AIInsights'
 import './DashboardPage.css'
 
 function DashboardPage() {
@@ -23,6 +24,7 @@ function DashboardPage() {
 
   // ML predictions states
   const [activeTab, setActiveTab] = useState('attendance') // 'attendance' or 'ml'
+  const [selectedAiContractor, setSelectedAiContractor] = useState('all')
   const [mlPredictions, setMlPredictions] = useState([])
   const [mlLoading, setMlLoading] = useState(false)
   const [mlError, setMlError] = useState('')
@@ -203,6 +205,18 @@ function DashboardPage() {
 
   const attendance = filteredData?.attendance || []
 
+  // Extract unique contractors
+  const uniqueContractorsMap = {}
+  attendance.forEach(record => {
+    if (record.contractor_id) {
+      uniqueContractorsMap[record.contractor_id] = record.contractor_name || record.contractor_id
+    }
+  })
+  const uniqueContractors = Object.keys(uniqueContractorsMap).map(id => ({
+    id,
+    name: uniqueContractorsMap[id]
+  }))
+
   // Apply filters in-memory
   const activeRecords = attendance.filter(record => {
     // 1. Shift Filter
@@ -267,6 +281,13 @@ function DashboardPage() {
             style={{ minWidth: '260px' }}
           >
             🧠 ML Attendance Behavior Predictions
+          </button>
+          <button 
+            className={`btn ${activeTab === 'ai' ? 'btn-primary' : 'btn-outline'}`}
+            onClick={() => handleTabChange('ai')}
+            style={{ minWidth: '220px' }}
+          >
+            🤖 AI Attendance Insights
           </button>
         </div>
 
@@ -620,6 +641,32 @@ function DashboardPage() {
                 </div>
               </div>
             )}
+          </div>
+        )}
+
+        {activeTab === 'ai' && (
+          <div className="dashboard-section" style={{ marginTop: '24px' }}>
+            <div style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <label style={{ fontWeight: '600', color: 'var(--text-dark)' }}>Filter by Contractor:</label>
+              <select
+                value={selectedAiContractor}
+                onChange={(e) => setSelectedAiContractor(e.target.value)}
+                style={{
+                  height: '40px',
+                  borderRadius: '8px',
+                  border: '1px solid var(--border-light)',
+                  padding: '0 12px',
+                  fontSize: '14px',
+                  minWidth: '200px'
+                }}
+              >
+                <option value="all">All Contractors</option>
+                {uniqueContractors.map(c => (
+                  <option key={c.id} value={c.id}>{c.name} ({c.id})</option>
+                ))}
+              </select>
+            </div>
+            <AIInsights contractorId={selectedAiContractor} period="weekly" />
           </div>
         )}
       </div>

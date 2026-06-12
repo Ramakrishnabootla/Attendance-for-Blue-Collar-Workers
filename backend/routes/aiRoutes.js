@@ -21,4 +21,11 @@ router.post('/generate-insights', aiController.generateInsights);
  */
 router.get('/contractor/:contractorId/insights', aiController.getContractorInsights);
 
+/**
+ * GET /api/ai/worker/:workerId/insights
+ * Get AI insights for a specific worker
+ * Query params: period (default: monthly)
+ */
+router.get('/worker/:workerId/insights', aiController.getWorkerInsights);
+
 module.exports = router;
