@@ -293,7 +293,7 @@ function DashboardPage() {
 
         {error && <div className="alert alert-error">{error}</div>}
 
-        {activeTab === 'attendance' ? (
+        {activeTab === 'attendance' && (
           <>
             {/* Control Bar */}
             <div className="dashboard-controls" style={{ gap: '12px', flexWrap: 'wrap', display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
@@ -470,7 +470,9 @@ function DashboardPage() {
               </div>
             )}
           </>
-        ) : (
+        )}
+        
+        {activeTab === 'ml' && (
           <div className="ml-panel-content slide-in-animation">
             {mlError && <div className="alert alert-error">{mlError}</div>}
             
