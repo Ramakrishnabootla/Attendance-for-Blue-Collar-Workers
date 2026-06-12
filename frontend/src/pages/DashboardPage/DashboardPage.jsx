@@ -3,7 +3,9 @@ import { fetchTodayAttendance, getAttendanceByDateRange, fetchMLPredictions, gen
 import { getTodayIndia, formatDateReadable, formatSecondsToHHMMSS, formatIndiaTimeWith12Hour } from '../../utils/timezoneHelper'
 import SearchBar from '../../components/SearchBar'
 import DateRangeSelector from '../../components/DateRangeSelector'
-import AIInsights from '../../components/AIInsights'
+import AttendanceTab from './components/AttendanceTab/AttendanceTab'
+import MLTab from './components/MLTab/MLTab'
+import AITab from './components/AITab/AITab'
 import './DashboardPage.css'
 
 function DashboardPage() {
@@ -294,382 +296,45 @@ function DashboardPage() {
         {error && <div className="alert alert-error">{error}</div>}
 
         {activeTab === 'attendance' && (
-          <>
-            {/* Control Bar */}
-            <div className="dashboard-controls" style={{ gap: '12px', flexWrap: 'wrap', display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
-              <div className="dashboard-control-item" style={{ flex: 1, minWidth: '200px' }}>
-                <SearchBar onSearch={handleSearchResults} placeholder="Search worker ID, name, or job..." />
-              </div>
-
-              <div style={{ minWidth: '150px' }}>
-                <select
-                  value={shiftFilter}
-                  onChange={(e) => setShiftFilter(e.target.value)}
-                  className="shift-filter-select"
-                  style={{
-                    height: '46px',
-                    borderRadius: '10px',
-                    border: '2px solid var(--border-light)',
-                    padding: '0 12px',
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    color: 'var(--text-medium)',
-                    backgroundColor: 'white',
-                    cursor: 'pointer',
-                    width: '100%'
-                  }}
-                >
-                  <option value="All">All Shifts</option>
-                  <option value="General">General Shift</option>
-                  <option value="Morning">Morning Shift</option>
-                  <option value="Evening">Evening Shift</option>
-                  <option value="Night">Night Shift</option>
-                </select>
-              </div>
-
-              <button
-                className={`btn ${isFilteredDate ? 'btn-primary' : 'btn-outline'}`}
-                onClick={() => setShowDateSelector(!showDateSelector)}
-              >
-                📅 {isFilteredDate ? 'Change Range' : 'Select Date Range'}
-              </button>
-
-              {isFilteredDate && (
-                <button
-                  className="btn btn-secondary"
-                  onClick={() => {
-                    loadDashboard()
-                  }}
-                >
-                  ← Reset Today
-                </button>
-              )}
-
-              <button
-                className="btn btn-secondary"
-                onClick={loadDashboard}
-              >
-                🔄 Refresh
-              </button>
-
-              <button
-                className="btn btn-success"
-                onClick={handleExportCSV}
-                disabled={activeRecords.length === 0}
-              >
-                📥 Export CSV
-              </button>
-            </div>
-
-            {/* Date Selector Modal */}
-            {showDateSelector && (
-              <div className="dashboard-date-selector-wrapper">
-                <DateRangeSelector
-                  onDateRangeSelect={handleDateRangeSelect}
-                  onCancel={() => setShowDateSelector(false)}
-                />
-              </div>
-            )}
-
-            {/* Summary Cards */}
-            <div className="dashboard-summary-row">
-              <div className="dashboard-card">
-                <h3>{totalRecords}</h3>
-                <p>Total Records</p>
-              </div>
-              <div className="dashboard-card present">
-                <h3>{presentCount}</h3>
-                <p>Present</p>
-              </div>
-              <div className="dashboard-card absent">
-                <h3>{absentCount}</h3>
-                <p>Absent</p>
-              </div>
-              <div className="dashboard-card percentage">
-                <h3>{presentPercentage}%</h3>
-                <p>Attendance Rate</p>
-              </div>
-              <div className="dashboard-card hours-card" style={{ borderTopColor: 'var(--warning-yellow)' }}>
-                <h3 style={{ color: 'var(--warning-yellow-dark)' }}>{totalHours} hrs</h3>
-                <p>Total Hours Worked</p>
-              </div>
-            </div>
-
-            {/* Attendance Table */}
-            <h2 className="dashboard-attendance-header">
-              {isFilteredDate ? 'Historical Attendance Details' : "Today's Attendance Details"}
-            </h2>
-
-            {activeRecords.length === 0 ? (
-              <p className="no-records">No attendance records found matching the filters.</p>
-            ) : (
-              <div className="dashboard-table-wrapper" style={{ position: 'relative', opacity: dateLoading ? 0.6 : 1, transition: 'opacity 0.3s ease' }}>
-                {dateLoading && (
-                  <div style={{
-                    position: 'absolute',
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    zIndex: 10
-                  }}>
-                    <div className="spinner" style={{ width: '40px', height: '40px' }}></div>
-                  </div>
-                )}
-                <table className="dashboard-table">
-                  <thead>
-                    <tr>
-                      {isFilteredDate && <th>Date</th>}
-                      <th>Worker ID</th>
-                      <th>Name</th>
-                      <th>Job Type</th>
-                      <th>Shift</th>
-                      <th>Check-In</th>
-                      <th>Check-Out</th>
-                      <th>Hours Worked</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {activeRecords.map((record, idx) => (
-                      <tr key={idx}>
-                        {isFilteredDate && <td><strong>{record.date}</strong></td>}
-                        <td><strong className="dashboard-worker-id">{record.worker_id}</strong></td>
-                        <td>{record.name}</td>
-                        <td>{record.job_type}</td>
-                        <td><span className="shift-pill" style={{
-                          display: 'inline-block',
-                          padding: '2px 8px',
-                          backgroundColor: 'var(--bg-lighter)',
-                          border: '1px solid var(--border-light)',
-                          borderRadius: '4px',
-                          fontSize: '12px',
-                          fontWeight: '600'
-                        }}>{record.shift_type || 'General'}</span></td>
-                        <td>
-                          {record.check_in ? formatIndiaTimeWith12Hour(record.check_in) : '-'}
-                        </td>
-                        <td>
-                          {record.check_out ? formatIndiaTimeWith12Hour(record.check_out) : '-'}
-                        </td>
-                        <td>
-                          <strong>{formatHoursDecimal(record.time_spent_seconds, record.status)}</strong>
-                        </td>
-                        <td>
-                          <span
-                            className={`dashboard-status-badge ${
-                              record.status === 'Present' ? 'present' : 'absent'
-                            }`}
-                          >
-                            {record.status === 'Present' ? '✓ Present' : '✗ Absent'}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </>
+          <AttendanceTab
+            searchQuery={searchQuery}
+            handleSearchResults={handleSearchResults}
+            shiftFilter={shiftFilter}
+            setShiftFilter={setShiftFilter}
+            isFilteredDate={isFilteredDate}
+            showDateSelector={showDateSelector}
+            setShowDateSelector={setShowDateSelector}
+            loadDashboard={loadDashboard}
+            handleExportCSV={handleExportCSV}
+            activeRecords={activeRecords}
+            handleDateRangeSelect={handleDateRangeSelect}
+            totalRecords={totalRecords}
+            presentCount={presentCount}
+            absentCount={absentCount}
+            presentPercentage={presentPercentage}
+            totalHours={totalHours}
+            dateLoading={dateLoading}
+            formatHoursDecimal={formatHoursDecimal}
+          />
         )}
         
         {activeTab === 'ml' && (
-          <div className="ml-panel-content slide-in-animation">
-            {mlError && <div className="alert alert-error">{mlError}</div>}
-            
-            {/* ML Summary Metrics Row */}
-            <div className="ml-summary-row" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '24px' }}>
-              <div className="ml-stat-card card" style={{ padding: '16px', textAlign: 'center', borderTop: '4px solid var(--primary-blue)' }}>
-                <h3 style={{ fontSize: '28px', fontWeight: '800', margin: '0 0 4px 0' }}>{mlPredictions.length}</h3>
-                <p style={{ margin: 0, fontSize: '12px', color: 'var(--text-light)', fontWeight: '600', textTransform: 'uppercase' }}>Total Evaluated Workers</p>
-              </div>
-              <div className="ml-stat-card card" style={{ padding: '16px', textAlign: 'center', borderTop: '4px solid var(--success-green)' }}>
-                <h3 style={{ fontSize: '28px', fontWeight: '800', margin: '0 0 4px 0', color: 'var(--success-green-dark)' }}>
-                  {mlPredictions.filter(p => p.prediction.category === 'Regular').length}
-                </h3>
-                <p style={{ margin: 0, fontSize: '12px', color: 'var(--text-light)', fontWeight: '600', textTransform: 'uppercase' }}>Regular Workers (Low Risk)</p>
-              </div>
-              <div className="ml-stat-card card" style={{ padding: '16px', textAlign: 'center', borderTop: '4px solid var(--warning-yellow)' }}>
-                <h3 style={{ fontSize: '28px', fontWeight: '800', margin: '0 0 4px 0', color: 'var(--warning-yellow-dark)' }}>
-                  {mlPredictions.filter(p => p.prediction.category === 'Irregular').length}
-                </h3>
-                <p style={{ margin: 0, fontSize: '12px', color: 'var(--text-light)', fontWeight: '600', textTransform: 'uppercase' }}>Irregular Attendance (Medium Risk)</p>
-              </div>
-              <div className="ml-stat-card card" style={{ padding: '16px', textAlign: 'center', borderTop: '4px solid var(--danger-red)' }}>
-                <h3 style={{ fontSize: '28px', fontWeight: '800', margin: '0 0 4px 0', color: 'var(--danger-red-dark)' }}>
-                  {mlPredictions.filter(p => p.prediction.category === 'High_Risk').length}
-                </h3>
-                <p style={{ margin: 0, fontSize: '12px', color: 'var(--text-light)', fontWeight: '600', textTransform: 'uppercase' }}>High Absence Risk (High Risk)</p>
-              </div>
-            </div>
-
-            {/* ML Control Bar */}
-            <div className="ml-controls-row card" style={{ display: 'flex', gap: '12px', alignItems: 'center', marginBottom: '20px', padding: '16px' }}>
-              <div className="ml-search-box" style={{ flex: 1 }}>
-                <input
-                  type="text"
-                  placeholder="🔍 Search worker ID, name, or risk level (e.g. HIGH, LOW)..."
-                  value={mlSearchQuery}
-                  onChange={(e) => setMlSearchQuery(e.target.value)}
-                  className="ml-search-input"
-                  style={{
-                    width: '100%',
-                    height: '46px',
-                    borderRadius: '10px',
-                    border: '2px solid var(--border-light)',
-                    padding: '0 16px',
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    outline: 'none'
-                  }}
-                />
-              </div>
-              <button 
-                className="btn btn-outline" 
-                onClick={handleReRunPredictions} 
-                disabled={mlLoading}
-                style={{ height: '46px', minWidth: '220px' }}
-              >
-                {mlLoading ? '⏳ Scoring Models...' : '🔄 Re-Run ML Predictions'}
-              </button>
-            </div>
-
-            {mlLoading ? (
-              <div className="spinner-wrapper" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 0' }}>
-                <div className="spinner" style={{ marginBottom: '16px' }}></div>
-                <p className="loading-text" style={{ fontStyle: 'italic', color: 'var(--text-light)' }}>Random Forest Classifier is analyzing historical trends and absences averages...</p>
-              </div>
-            ) : (
-              <div className="ml-predictions-table-card card" style={{ padding: '0', overflow: 'hidden' }}>
-                <div className="table-wrapper">
-                  <table className="ml-predictions-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-                    <thead>
-                      <tr style={{ backgroundColor: 'var(--bg-light)', borderBottom: '2px solid var(--border-light)' }}>
-                        <th style={{ padding: '14px 18px', fontSize: '13px', fontWeight: '700', color: 'var(--text-dark)' }}>Worker ID</th>
-                        <th style={{ padding: '14px 18px', fontSize: '13px', fontWeight: '700', color: 'var(--text-dark)' }}>Name</th>
-                        <th style={{ padding: '14px 18px', fontSize: '13px', fontWeight: '700', color: 'var(--text-dark)' }}>Job Type</th>
-                        <th style={{ padding: '14px 18px', fontSize: '13px', fontWeight: '700', color: 'var(--text-dark)' }}>Contractor</th>
-                        <th style={{ padding: '14px 18px', fontSize: '13px', fontWeight: '700', color: 'var(--text-dark)' }}>ML Prediction Category</th>
-                        <th style={{ padding: '14px 18px', fontSize: '13px', fontWeight: '700', color: 'var(--text-dark)' }}>Risk Level</th>
-                        <th style={{ padding: '14px 18px', fontSize: '13px', fontWeight: '700', color: 'var(--text-dark)' }}>Recommendations & Action Items</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {mlPredictions.filter(p => {
-                        if (!mlSearchQuery.trim()) return true;
-                        const q = mlSearchQuery.toLowerCase();
-                        return (p.worker_id || '').toLowerCase().includes(q) ||
-                               (p.name || '').toLowerCase().includes(q) ||
-                               (p.prediction?.category || '').toLowerCase().includes(q) ||
-                               (p.prediction?.risk_level || '').toLowerCase().includes(q);
-                      }).length === 0 ? (
-                        <tr>
-                          <td colSpan="7" style={{ textAlign: 'center', padding: '30px', color: 'var(--text-light)', fontStyle: 'italic' }}>No predictions matched your filters.</td>
-                        </tr>
-                      ) : (
-                        mlPredictions.filter(p => {
-                          if (!mlSearchQuery.trim()) return true;
-                          const q = mlSearchQuery.toLowerCase();
-                          return (p.worker_id || '').toLowerCase().includes(q) ||
-                                 (p.name || '').toLowerCase().includes(q) ||
-                                 (p.prediction?.category || '').toLowerCase().includes(q) ||
-                                 (p.prediction?.risk_level || '').toLowerCase().includes(q);
-                        }).map((p) => {
-                          const categoryName = p.prediction.category === 'High_Risk' 
-                            ? 'High Absence Risk' 
-                            : p.prediction.category === 'Irregular' 
-                              ? 'Irregular Attendance' 
-                              : 'Regular Worker';
-
-                          const isHigh = p.prediction.risk_level === 'HIGH';
-                          const isMed = p.prediction.risk_level === 'MEDIUM';
-                          
-                          const badgeColor = isHigh ? 'var(--danger-red-dark)' : isMed ? 'var(--warning-yellow-dark)' : 'var(--success-green-dark)';
-                          const badgeBg = isHigh ? '#FEF2F2' : isMed ? '#FEFCE8' : '#F0FDF4';
-                          const badgeBorder = isHigh ? '#FEE2E2' : isMed ? '#FEF08A' : '#DCFCE7';
-
-                          const catColor = isHigh ? 'var(--danger-red)' : isMed ? '#D97706' : 'var(--success-green)';
-
-                          return (
-                            <tr key={p.worker_id} style={{ borderBottom: '1px solid var(--border-lighter)' }}>
-                              <td style={{ padding: '14px 18px' }}><strong>{p.worker_id}</strong></td>
-                              <td style={{ padding: '14px 18px' }}>{p.name}</td>
-                              <td style={{ padding: '14px 18px' }}>
-                                <span style={{
-                                  display: 'inline-block',
-                                  padding: '2px 8px',
-                                  backgroundColor: 'var(--bg-lighter)',
-                                  color: 'var(--text-medium)',
-                                  borderRadius: '6px',
-                                  fontSize: '12px',
-                                  fontWeight: '600'
-                                }}>
-                                  {p.job_type}
-                                </span>
-                              </td>
-                              <td style={{ padding: '14px 18px' }}>{p.contractor_name}</td>
-                              <td style={{ padding: '14px 18px' }}>
-                                <strong style={{ color: catColor }}>
-                                  {categoryName}
-                                </strong>
-                              </td>
-                              <td style={{ padding: '14px 18px' }}>
-                                <span style={{
-                                  display: 'inline-block',
-                                  padding: '4px 10px',
-                                  color: badgeColor,
-                                  backgroundColor: badgeBg,
-                                  border: `1px solid ${badgeBorder}`,
-                                  borderRadius: '6px',
-                                  fontSize: '11px',
-                                  fontWeight: '800',
-                                  textAlign: 'center'
-                                }}>
-                                  {p.prediction.risk_level}
-                                </span>
-                              </td>
-                              <td style={{ padding: '14px 18px' }}>
-                                <ul style={{ margin: 0, paddingLeft: '16px', fontSize: '13px', color: 'var(--text-medium)', lineHeight: '1.5' }}>
-                                  {p.prediction.recommendations.map((rec, rIdx) => (
-                                    <li key={rIdx}>{rec}</li>
-                                  ))}
-                                </ul>
-                              </td>
-                            </tr>
-                          )
-                        })
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
-          </div>
+          <MLTab
+            mlError={mlError}
+            mlPredictions={mlPredictions}
+            mlSearchQuery={mlSearchQuery}
+            setMlSearchQuery={setMlSearchQuery}
+            handleReRunPredictions={handleReRunPredictions}
+            mlLoading={mlLoading}
+          />
         )}
 
         {activeTab === 'ai' && (
-          <div className="dashboard-section" style={{ marginTop: '24px' }}>
-            <div style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <label style={{ fontWeight: '600', color: 'var(--text-dark)' }}>Filter by Contractor:</label>
-              <select
-                value={selectedAiContractor}
-                onChange={(e) => setSelectedAiContractor(e.target.value)}
-                style={{
-                  height: '40px',
-                  borderRadius: '8px',
-                  border: '1px solid var(--border-light)',
-                  padding: '0 12px',
-                  fontSize: '14px',
-                  minWidth: '200px'
-                }}
-              >
-                <option value="all">All Contractors</option>
-                {uniqueContractors.map(c => (
-                  <option key={c.id} value={c.id}>{c.name} ({c.id})</option>
-                ))}
-              </select>
-            </div>
-            <AIInsights contractorId={selectedAiContractor} period="weekly" />
-          </div>
+          <AITab
+            selectedAiContractor={selectedAiContractor}
+            setSelectedAiContractor={setSelectedAiContractor}
+            uniqueContractors={uniqueContractors}
+          />
         )}
       </div>
     </div>

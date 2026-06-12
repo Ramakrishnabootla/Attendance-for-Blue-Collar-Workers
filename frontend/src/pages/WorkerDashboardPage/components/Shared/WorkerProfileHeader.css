@@ -1,0 +1,91 @@
+/* Worker Dashboard Styles - Premium Theme */
+
+.worker-dashboard {
+  padding: var(--spacing-xl) var(--spacing-md);
+  background-color: var(--bg-light);
+  min-height: 100vh;
+}
+
+.worker-profile-card {
+  border-top: 5px solid var(--primary-blue);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+}
+
+.worker-profile-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+  border-bottom: 1px solid var(--border-light);
+  padding-bottom: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+.worker-avatar {
+  font-size: 40px;
+  background-color: var(--border-light);
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-sm);
+  border: 3px solid white;
+}
+
+.worker-meta {
+  flex: 1;
+}
+
+.worker-meta h2 {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin: 0;
+  margin-bottom: 4px;
+}
+
+.worker-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  background: var(--bg-lighter);
+  color: var(--primary-blue);
+  border-radius: var(--radius-full);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.logout-header-btn {
+  font-size: 14px;
+  padding: 8px 16px;
+  min-height: 38px;
+  min-width: unset;
+}
+
+.worker-profile-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-md);
+}
+
+.profile-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.profile-label {
+  font-size: 12px;
+  color: var(--text-lighter);
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+.profile-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-dark);
+}
+

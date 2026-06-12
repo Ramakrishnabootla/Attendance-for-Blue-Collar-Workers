@@ -1,0 +1,37 @@
+/* Stats Cards */
+.worker-stats-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.worker-stat-card {
+  padding: var(--spacing-md);
+  text-align: center;
+  border-top: 4px solid var(--primary-blue-light);
+}
+
+.worker-stat-card.rate-card {
+  border-top-color: var(--success-green);
+}
+
+.worker-stat-card.hours-card {
+  border-top-color: var(--warning-yellow);
+}
+
+.worker-stat-card h3 {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--text-dark);
+  margin-bottom: var(--spacing-xs);
+}
+
+.worker-stat-card p {
+  font-size: 12px;
+  color: var(--text-light);
+  margin: 0;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+

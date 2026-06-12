@@ -139,7 +139,11 @@ if __name__ == '__main__':
     df = generate_synthetic_dataset(n_samples=1000)
     
     # Save to CSV
-    output_path = 'data/synthetic_attendance_data.csv'
+    from pathlib import Path
+    output_path = str(Path(__file__).parent.parent / 'data' / 'synthetic_attendance_data.csv')
+    
+    # Create data directory if it doesn't exist
+    Path(output_path).parent.mkdir(parents=True, exist_ok=True)
     df.to_csv(output_path, index=False)
     
     print(f"✓ Dataset generated: {output_path}")

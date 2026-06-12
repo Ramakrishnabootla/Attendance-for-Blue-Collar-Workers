@@ -1,0 +1,96 @@
+/* Today's Status Widget */
+.today-status-card {
+  border-top: 4px solid var(--success-green);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+}
+
+.today-status-card h3 {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: var(--spacing-md);
+}
+
+.today-status-details {
+  background: var(--bg-light);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-light);
+}
+
+.status-badge-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.shift-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  background-color: var(--border-light);
+  color: var(--text-medium);
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+}
+
+.today-times-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-sm);
+}
+
+.time-box {
+  display: flex;
+  flex-direction: column;
+  background-color: white;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-lighter);
+  text-align: center;
+}
+
+.time-label {
+  font-size: 11px;
+  color: var(--text-light);
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.time-val {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-dark);
+}
+
+.hours-val {
+  color: var(--success-green-dark);
+}
+
+.absent-reason-msg {
+  font-size: 14px;
+  color: var(--text-medium);
+  margin: 0;
+}
+
+.no-status-yet {
+  font-size: 14px;
+  color: var(--text-medium);
+  font-style: italic;
+  margin: 0;
+}
+
+/* Custom styles based on types */
+.notif-profile_update {
+  border-left: 4px solid var(--primary-blue);
+}
+
+.notif-check_in {
+  border-left: 4px solid var(--success-green);
+}
+
+.notif-check_out {
+  border-left: 4px solid var(--warning-yellow);
+}
+

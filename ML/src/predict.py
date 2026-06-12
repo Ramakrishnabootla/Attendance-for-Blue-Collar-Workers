@@ -15,7 +15,7 @@ from pathlib import Path
 warnings.filterwarnings('ignore', message='.*Trying to unpickle estimator.*')
 
 # Get model path
-model_path = Path(__file__).parent / 'models' / 'random_forest_model.pkl'
+model_path = Path(__file__).parent.parent / 'models' / 'random_forest_model.pkl'
 
 def load_model():
     """Load the trained Random Forest model"""

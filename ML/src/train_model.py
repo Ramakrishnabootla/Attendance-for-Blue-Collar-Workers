@@ -20,8 +20,10 @@ from pathlib import Path
 # Set random seed for reproducibility
 np.random.seed(42)
 
-def load_data(data_path='data/synthetic_attendance_data.csv'):
+def load_data(data_path=None):
     """Load synthetic dataset"""
+    if data_path is None:
+        data_path = str(Path(__file__).parent.parent / 'data' / 'synthetic_attendance_data.csv')
     print(f"Loading data from {data_path}...")
     df = pd.read_csv(data_path)
     return df
@@ -139,7 +141,9 @@ def train_model(X, y):
     
     return model, X_test, y_test, feature_importance
 
-def save_model(model, model_path='models/random_forest_model.pkl'):
+def save_model(model, model_path=None):
+    if model_path is None:
+        model_path = str(Path(__file__).parent.parent / 'models' / 'random_forest_model.pkl')
     """Save trained model"""
     Path(model_path).parent.mkdir(parents=True, exist_ok=True)
     joblib.dump(model, model_path)
@@ -200,8 +204,9 @@ def create_visualizations(model, X_test, y_test, feature_importance):
              bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5))
     
     plt.tight_layout()
-    plt.savefig('models/model_evaluation.png', dpi=300, bbox_inches='tight')
-    print(f"[SUCCESS] Visualizations saved: models/model_evaluation.png")
+    viz_path = str(Path(__file__).parent.parent / 'models' / 'model_evaluation.png')
+    plt.savefig(viz_path, dpi=300, bbox_inches='tight')
+    print(f"[SUCCESS] Visualizations saved: {viz_path}")
     plt.close()
 
 def main():
