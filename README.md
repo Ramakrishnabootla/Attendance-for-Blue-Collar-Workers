@@ -1,16 +1,89 @@
-# Project Title
-**AI-Enhanced Attendance Management System for Blue Collar Workers**
+# Attendance for Blue Collar Workers
 
-## Project Overview
-This project is a complete working application designed to intelligently track and manage the attendance of blue-collar workers. It goes beyond simple check-in/check-out by integrating Machine Learning (to predict worker behavior and flight risk) and Generative AI (to provide actionable, concise insights for contractors). 
+An AI-powered attendance management system designed specifically for 
+blue-collar workers and supervisors. The system simplifies attendance
+tracking, worker management, and provides intelligent insights using
+Machine Learning and Generative AI.
 
-Features include:
-- A Supervisor Dashboard to bulk-mark attendance and view statistics.
-- A Worker Portal for transparency into their own shifts and notifications.
-- Automated ML predictions for categorizing workers (e.g., "Regular Worker", "High Absence Risk").
-- GenAI-driven 2-line performance insights tailored for specific contractors and workers.
-- Automated background tasks, such as auto-checkout after 6 hours.
+------------------------------------------------------------------------
+# Deployment Link : https://bluecollarworkers.vercel.app/
+------------------------------------------------------------------------
 
+## 📌 Project Overview
+
+Attendance for Blue Collar Workers is a full-stack web application that
+enables supervisors to efficiently manage workers and their attendance
+while allowing workers to transparently view their attendance history
+and status.
+
+The application includes:
+
+-   Supervisor and Worker authentication
+-   Worker management (Add, Update, Activate, Deactivate)
+-   Daily attendance marking
+-   Bulk attendance support
+-   Attendance history and analytics
+-   Automatic checkout after 6 hours
+-   Machine Learning based worker categorization
+-   Generative AI based worker and contractor insights
+-   Notifications for workers
+
+------------------------------------------------------------------------
+
+## ✨ Features
+
+### Supervisor Features
+
+-   Secure login
+-   Add new workers
+-   Update worker details
+-   Activate / Deactivate workers
+-   Mark attendance individually
+-   Bulk attendance marking
+-   View attendance history
+-   View attendance analytics
+-   View contractor-wise reports
+-   Generate AI-powered insights
+
+### Worker Features
+
+-   Secure login using Worker ID + PIN/Phone
+-   View attendance records
+-   View notifications
+-   View attendance statistics
+-   Check attendance status
+
+### AI Features
+
+-   Worker performance insights
+-   Contractor performance analysis
+-   Attendance trend analysis
+-   AI-generated recommendations
+
+### Machine Learning Features
+
+-   Worker categorization using Random Forest
+-   Attendance pattern analysis
+-   Batch predictions
+-   Store prediction history
+
+------------------------------------------------------------------------
+
+## 🏗️ Project Architecture
+
+``` text
+Frontend (React)
+↓
+Backend API (Node.js + Express)
+↓
+Supabase PostgreSQL Database
+↓
+Python ML Service (Random Forest)
+↓
+GenAI Service (Groq / Gemini / OpenAI)
+```
+
+------------------------------------------------------------------------
 ## Technologies Used
 - **Frontend:** React.js (Vite), HTML, CSS, JavaScript, Recharts
 - **Backend:** Node.js, Express.js (Controller-Service Architecture)
@@ -18,11 +91,62 @@ Features include:
 - **Machine Learning:** Python, scikit-learn, pandas, joblib (Random Forest Classifier)
 - **Generative AI:** Groq API (LLaMA 3)
 
-## Setup Instructions
-Ensure you have the following installed on your system:
-- Node.js (v18 or higher)
-- Python (3.8 or higher)
-- Git
+------------------------------------------------------------------------
+
+## 📂 Project Structure
+
+``` bash
+Attendance-for-Blue-Collar-Workers
+├── frontend/
+├── backend/
+│   ├── controllers/
+│   ├── routes/
+│   ├── services/
+│   ├── config/
+│   └── index.js
+├── ML/
+├── setup.sql
+└── README.md
+```
+
+------------------------------------------------------------------------
+
+## ⚙️ Prerequisites
+
+-   Node.js (v18 or later)
+-   npm
+-   Python 3.10+
+-   pip
+-   Supabase account
+
+------------------------------------------------------------------------
+
+## 🗄️ Database Setup
+
+1.  Create a Supabase project.
+2.  Copy the project URL and API key.
+3.  Execute `setup.sql` in the Supabase SQL editor.
+
+This creates: - supervisors - workers - attendance - notifications -
+ml_predictions
+
+------------------------------------------------------------------------
+
+## 🔑 Environment Variables
+
+Create `.env` inside backend:
+
+``` env
+PORT=5000
+SUPABASE_URL=your_supabase_url
+SUPABASE_KEY=your_supabase_key
+AI_PROVIDER=groq
+GROQ_API_KEY=your_groq_api_key
+OPENAI_API_KEY=your_openai_api_key
+GEMINI_API_KEY=your_gemini_api_key
+```
+
+------------------------------------------------------------------------
 
 ## Steps to run the Backend
 1. Open a terminal and navigate to the `Backend` folder:
@@ -55,6 +179,7 @@ Ensure you have the following installed on your system:
    ```
 4. Open the provided local URL (usually `http://localhost:5050`) in your web browser.
 
+
 ## Database Setup Details
 This project uses Supabase (PostgreSQL) as its database.
 1. Create a `.env` file in the `Backend` directory.
@@ -63,7 +188,7 @@ This project uses Supabase (PostgreSQL) as its database.
    SUPABASE_URL=https://yqpphruslmmmurwluqwr.supabase.co
    SUPABASE_KEY=your_supabase_service_role_key
    ```
-*(Note: A pre-configured database is already attached if you use the provided credentials in the submission, otherwise execute the provided `setup.sql` in your own PostgreSQL instance).*
+*(Note: A pre-configured database is already attached execute the provided `setup.sql` in your own PostgreSQL instance).*
 
 ## ML Model Details
 The Machine Learning module uses a **Random Forest Classifier** to predict worker attendance behavior.
@@ -79,4 +204,27 @@ The Generative AI module uses the **Groq API** to generate insights.
    ```env
    GROQ_API_KEY=your_groq_api_key_here
    ```
-The backend `aiService.js` automatically uses this key to authenticate with the Groq LLaMA model and return 2-line performance insights on the frontend dashboard.
+   The backend `aiService.js` automatically uses this key to authenticate with the Groq LLaMA model and return 2-line performance insights on the frontend dashboard.
+
+------------------------------------------------------------------------
+
+## 🔮 Future Enhancements
+
+-   Face Recognition attendance
+-   QR Code attendance
+-   Mobile app
+-   Real-time notifications
+-   Advanced analytics
+-   Multi-language support
+
+------------------------------------------------------------------------
+
+## 👨‍💻 Author
+
+**Ramakrishna Bootla**
+
+GitHub: https://github.com/Ramakrishnabootla
+
+------------------------------------------------------------------------
+
+⭐ If you like this project, give it a Star on GitHub.
