@@ -63,7 +63,7 @@ This project uses Supabase (PostgreSQL) as its database.
    SUPABASE_URL=https://yqpphruslmmmurwluqwr.supabase.co
    SUPABASE_KEY=your_supabase_service_role_key
    ```
-*(Note: A pre-configured database is already attached if you use the provided credentials in the submission, otherwise execute the provided `setup.sql` in your own PostgreSQL instance).*
+*(Note: A pre-configured database is already execute the provided `setup.sql` in your own PostgreSQL instance).*
 
 ## ML Model Details
 The Machine Learning module uses a **Random Forest Classifier** to predict worker attendance behavior.
