@@ -212,9 +212,9 @@ The Generative AI module uses the **Groq API** to generate insights.
 
 **Ramakrishna Bootla**
 
-GitHub: https://github.com/Ramakrishnabootla
-LinkedIn: https://www.linkedin.com/in/ramakrishna-bootla-7ba1b5338/
-Portfolio: https://ramakrishnab.vercel.app/
+- GitHub: https://github.com/Ramakrishnabootla
+- LinkedIn: https://www.linkedin.com/in/ramakrishna-bootla-7ba1b5338/
+- Portfolio: https://ramakrishnab.vercel.app/
 
 ------------------------------------------------------------------------
 
