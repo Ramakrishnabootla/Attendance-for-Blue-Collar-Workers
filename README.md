@@ -1,4 +1,4 @@
-# Attendance for Blue Collar Workers
+# AI-Enhanced Attendance Management System for Blue Collar Workers
 
 An AI-powered attendance management system designed specifically for 
 blue-collar workers and supervisors. The system simplifies attendance
@@ -6,7 +6,7 @@ tracking, worker management, and provides intelligent insights using
 Machine Learning and Generative AI.
 
 ------------------------------------------------------------------------
-# Deployment Link : https://bluecollarworkers.vercel.app/
+## Deployment Link : https://bluecollarworkers.vercel.app/
 ------------------------------------------------------------------------
 
 ## 📌 Project Overview
@@ -121,17 +121,6 @@ Attendance-for-Blue-Collar-Workers
 
 ------------------------------------------------------------------------
 
-## 🗄️ Database Setup
-
-1.  Create a Supabase project.
-2.  Copy the project URL and API key.
-3.  Execute `setup.sql` in the Supabase SQL editor.
-
-This creates: - supervisors - workers - attendance - notifications -
-ml_predictions
-
-------------------------------------------------------------------------
-
 ## 🔑 Environment Variables
 
 Create `.env` inside backend:
@@ -188,11 +177,7 @@ This project uses Supabase (PostgreSQL) as its database.
    SUPABASE_URL=https://yqpphruslmmmurwluqwr.supabase.co
    SUPABASE_KEY=your_supabase_service_role_key
    ```
-<<<<<<< HEAD
-*(Note: A pre-configured database is already attached execute the provided `setup.sql` in your own PostgreSQL instance).*
-=======
-*(Note: A pre-configured database is already execute the provided `setup.sql` in your own PostgreSQL instance).*
->>>>>>> ca5771aef74f6a816ec1253caeaaf079d5a59576
+*(Note: A pre-configured database is already attached, execute the provided `setup.sql` in your own PostgreSQL instance).*
 
 ## ML Model Details
 The Machine Learning module uses a **Random Forest Classifier** to predict worker attendance behavior.
@@ -228,6 +213,8 @@ The Generative AI module uses the **Groq API** to generate insights.
 **Ramakrishna Bootla**
 
 GitHub: https://github.com/Ramakrishnabootla
+LinkedIn: https://www.linkedin.com/in/ramakrishna-bootla-7ba1b5338/
+Portfolio: https://ramakrishnab.vercel.app/
 
 ------------------------------------------------------------------------
 
